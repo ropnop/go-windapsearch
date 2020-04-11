@@ -1,4 +1,4 @@
-package windapsession
+package ldapsession
 
 var FunctionalityLevelsMapping = map[string]string{
 	"0": "2000",

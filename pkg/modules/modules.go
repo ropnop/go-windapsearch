@@ -1,39 +1,18 @@
 package modules
 
 import (
-	"fmt"
-	"io"
+	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
+	"gopkg.in/ldap.v3"
 )
 
-var AllModules []WindapModule
-
-type WindapModule struct {
-	Name string
-	Description string
-	Filter string
-	DefaultAttrs []string
-	OutputOptions OutputOptions
-}
-
-type OutputOptions struct {
-	ResolveHosts bool
-	Attributes []string
-	Full bool
-	JSON bool
-	Output io.Writer
-}
-
 type Module interface {
-	GetHelp() string
-	GetFilter() string
+	Name() string
+	Description() string
+	Filter() string
+	Options() interface{}
+	DefaultAttrs() []string
+	Run(session *ldapsession.LDAPSession, attrs []string) (*ldap.SearchResult, error)
 }
 
-func (m *WindapModule) SetAttrs(attrs []string) {
-	m.DefaultAttrs = attrs
-}
-
-func (m *WindapModule) AddFilter(filter string) {
-	newFilter := fmt.Sprintf("(&(%s)(%s))", m.Filter, filter)
-	m.Filter = newFilter
-}
+var AllModules []Module
 

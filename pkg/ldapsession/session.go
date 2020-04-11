@@ -1,4 +1,4 @@
-package windapsession
+package ldapsession
 
 import (
 	"crypto/tls"
@@ -18,14 +18,14 @@ type LDAPSessionOptions struct {
 	Secure bool
 }
 
-type Windapsession struct {
+type LDAPSession struct {
 	lConn  *ldap.Conn
 	BaseDN string
 	attrs  []string
 	DomainInfo DomainInfo
 }
 
-func NewWindapSession(options *LDAPSessionOptions) (sess Windapsession, err error) {
+func NewLDAPSession(options *LDAPSessionOptions) (sess *LDAPSession, err error) {
 	port := options.Port
 	dc := options.DomainController
 	if port == 0 {
@@ -57,7 +57,7 @@ func NewWindapSession(options *LDAPSessionOptions) (sess Windapsession, err erro
 	if options.Secure {
 		lConn.StartTLS(&tls.Config{InsecureSkipVerify: true})
 	}
-	sess = Windapsession{
+	sess = &LDAPSession{
 		lConn: lConn,
 	}
 	err = sess.Bind(options.Username, options.Password)
@@ -71,7 +71,7 @@ func NewWindapSession(options *LDAPSessionOptions) (sess Windapsession, err erro
 	return sess, nil
 }
 
-func (w *Windapsession) Bind(username, password string) (err error) {
+func (w *LDAPSession) Bind(username, password string) (err error) {
 	if username == "" {
 		err = w.lConn.UnauthenticatedBind("")
 	} else {
@@ -83,11 +83,11 @@ func (w *Windapsession) Bind(username, password string) (err error) {
 	return
 }
 
-func (w *Windapsession) Close() {
+func (w *LDAPSession) Close() {
 	w.lConn.Close()
 }
 
-func (w *Windapsession) getMetaData() (err error) {
+func (w *LDAPSession) getMetaData() (err error) {
 	sr := ldap.NewSearchRequest(
 		"",
 		ldap.ScopeBaseObject,
