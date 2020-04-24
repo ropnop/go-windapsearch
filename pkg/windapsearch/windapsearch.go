@@ -57,6 +57,7 @@ type CommandLineOptions struct {
 	JSON bool
 	Module string
 	Interactive bool
+	ModuleFlags *pflag.FlagSet
 }
 
 
@@ -72,7 +73,7 @@ func NewSession() *WindapSearchSession {
 	wFlags.IntVar(&w.Options.Port, "port", 0, "Port to connect to (if non standard)")
 	wFlags.BoolVar(&w.Options.Secure, "secure", false, "Use LDAPS. This will not verify TLS certs, however. (default: false)" )
 	wFlags.BoolVarP(&w.Options.ResolveHosts, "resolve", "r", false, "Resolve IP addresses for enumerated computer names. Will make DNS queries against system NS")
-	wFlags.StringSliceVar(&w.Options.Attributes, "attrs", nil, "Comma separated custom atrribute names to display (e.g. 'badPwdCount,lastLogon')")
+	//wFlags.StringSliceVar(&w.Options.Attributes, "attrs", nil, "Comma separated custom atrribute names to display (e.g. 'badPwdCount,lastLogon')")
 	wFlags.BoolVar(&w.Options.FullAttributes, "full", false, "Output all attributes from LDAP")
 	wFlags.StringVarP(&w.Options.Output, "output", "o", "", "Save results to file")
 	wFlags.BoolVarP(&w.Options.JSON, "json", "j", false, "Convert LDAP output to JSON" )
@@ -97,6 +98,15 @@ func NewSession() *WindapSearchSession {
 
 func (w *WindapSearchSession) RegisterModule(mod modules.Module) {
 	w.AllModules = append(w.AllModules, mod)
+}
+
+func (w *WindapSearchSession) LoadModule() {
+	mod := w.GetModuleByName(w.Options.Module)
+	if mod != nil {
+		w.Module = mod
+		w.Options.ModuleFlags = mod.FlagSet()
+		w.Options.ModuleFlags.StringSliceVar(&w.Options.Attributes, "attrs", mod.DefaultAttrs(), "Comma separated custom atrributes to display")
+	}
 }
 
 func (w *WindapSearchSession) ModuleListString() string {
@@ -133,7 +143,8 @@ func (w *WindapSearchSession) ShowUsage() {
 		fmt.Fprintf(os.Stderr, "\nAvailable modules:\n%s", w.ModuleDescriptionString())
 	} else {
 		fmt.Fprintf(os.Stderr, "\nOptions for %q module:\n", w.Module.Name())
-		w.Module.FlagSet().PrintDefaults()
+		w.Options.ModuleFlags.PrintDefaults()
+		//fmt.Fprintf(os.Stderr, "\nDefault attrs for %q:\t[%s]\n", w.Module.Name(), strings.Join(w.Module.DefaultAttrs(), ","))
 	}
 }
 
@@ -191,12 +202,7 @@ func (w *WindapSearchSession) Run() (err error) {
 	}
 }
 
-func (w *WindapSearchSession) LoadModule() {
-	mod := w.GetModuleByName(w.Options.Module)
-	if mod != nil {
-		w.Module = mod
-	}
-}
+
 
 func (w *WindapSearchSession) StartCLI() error {
 	if w.Module == nil {
@@ -205,29 +211,19 @@ func (w *WindapSearchSession) StartCLI() error {
 		return nil
 	}
 
-	mod := w.GetModuleByName(w.Options.Module)
-	if mod == nil {
-		w.ShowUsage()
-		fmt.Println()
-		fmt.Printf("[!] Module %q not found\n", w.Options.Module)
-		return nil
-	}
 
-	modFlags := mod.FlagSet()
-	modFlags.AddFlagSet(w.Options.FlagSet)
-	modFlags.Parse(os.Args[:])
+	w.Options.ModuleFlags.AddFlagSet(w.Options.FlagSet)
+	w.Options.ModuleFlags.Parse(os.Args[:])
 
 
 
 	var attrs []string
 	if w.Options.FullAttributes {
 		attrs = []string{"*"}
-	} else if len(w.Options.Attributes) > 0 {
-		attrs = w.Options.Attributes
 	} else {
-		attrs = mod.DefaultAttrs()
+		attrs = w.Options.Attributes
 	}
-	results, err := mod.Run(w.LDAPSession, attrs)
+	results, err := w.Module.Run(w.LDAPSession, attrs)
 	if err != nil  { return err }
 
 
