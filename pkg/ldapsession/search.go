@@ -1,6 +1,7 @@
 package ldapsession
 
 import (
+	"fmt"
 	"gopkg.in/ldap.v3"
 )
 
@@ -19,6 +20,8 @@ func (w *LDAPSession) GetSearchResults(request *ldap.SearchRequest) (result *lda
 	return w.lConn.SearchWithPaging(request, 1000)
 }
 
-
+func (w *LDAPSession) AddExtraFilter(filter, extra string) string {
+	return fmt.Sprintf("(&(%s)(%s))", filter, extra)
+}
 
 

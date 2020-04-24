@@ -1,7 +1,16 @@
 package main
 
-import "github.com/ropnop/go-windapsearch/cmd"
+import (
+	"fmt"
+	"github.com/ropnop/go-windapsearch/pkg/windapsearch"
+	"os"
+)
 
 func main() {
-	cmd.Run()
+	w := windapsearch.NewSession()
+	err := w.Run()
+	if err != nil {
+		fmt.Printf("[!] %s\n", err)
+		os.Exit(-1)
+	}
 }

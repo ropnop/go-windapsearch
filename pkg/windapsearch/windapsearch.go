@@ -1,11 +1,12 @@
 package windapsearch
 
 import (
+	"errors"
 	"fmt"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/ropnop/go-windapsearch/pkg/modules"
 	"github.com/ropnop/go-windapsearch/pkg/utils"
-	flag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"gopkg.in/ldap.v3"
 	"io"
 	"os"
@@ -13,49 +14,56 @@ import (
 )
 
 type WindapSearchSession struct {
-	Options CommandLineOptions
-	ModuleOptions    ModuleOptions
-	LDAPSession *ldapsession.LDAPSession
-	Modules []modules.Module
+	Options      CommandLineOptions
+	LDAPSession  *ldapsession.LDAPSession
+	Module modules.Module
+	AllModules   []modules.Module
 	OutputWriter io.Writer
 }
 
-var (
-	Domain string
+
+var RootFlagSet *pflag.FlagSet
+
+func init() {
+	RootFlagSet = pflag.NewFlagSet("windapsearch", pflag.ExitOnError)
+	RootFlagSet.SortFlags = false
+	RootFlagSet.StringP("domain", "d", "", "The FQDN of the domain (e.g. 'lab.example.com'). Only needed if dc not provided")
+	RootFlagSet.String("dc", "", "The Domain Controller to query against")
+	RootFlagSet.StringP( "username", "u", "", "The full username with domain to bind with (e.g. 'ropnop@lab.example.com' or 'LAB\\ropnop')\n If not specified, will attempt anonymous bind")
+	RootFlagSet.StringP( "password", "p", "", "Password to use. If not specified, will be prompted for")
+	RootFlagSet.Int( "port", 0, "Port to connect to (if non standard)")
+	RootFlagSet.Bool( "secure", false, "Use LDAPS. This will not verify TLS certs, however. (default: false)" )
+	RootFlagSet.BoolP( "resolve", "r", false, "Resolve IP addresses for enumerated computer names. Will make DNS queries against system NS")
+	RootFlagSet.StringSlice( "attrs", nil, "Comma separated custom atrribute names to display (e.g. 'badPwdCount,lastLogon')")
+	RootFlagSet.Bool( "full", false, "Output all attributes from LDAP")
+	RootFlagSet.StringP( "output", "o", "", "Save results to file")
+	RootFlagSet.BoolP( "json", "j", false, "Convert LDAP output to JSON" )
+	RootFlagSet.BoolP( "interactive", "i", false, "Start in interactive mode")
+}
+
+type CommandLineOptions struct {
+	FlagSet *pflag.FlagSet
+	Help	bool
+	Domain           string
 	DomainController string
 	Username string
 	Password string
 	Port int
 	Secure bool
-	Module string
-)
-
-type CommandLineOptions struct {
-	FlagSet *flag.FlagSet
-	Domain           string `group:"Domain Options" short:"d" long:"domain" description:"The FQDN of the domain (e.g. 'lab.example.com'). Only needed if dc not provided"`
-	DomainController string `group:"Domain Options" long:"dc" description:"The Domain Controller to query against"`
-	Username string `group:"Bind Options" short:"u" long:"username" description:"The full username with domain to bind with (e.g. 'ropnop@lab.example.com' or 'LAB\\ropnop') If not specified, will attempt anonymous bind"`
-	Password string `group:"Bind Options" short:"p" long:"password" description:"Password to use. If not specified, will be prompted for"`
-	Port int `group:"Bind Options" long:"port" description:"Port to connect to (if non standard)"`
-	Secure bool `group:"Bind Options" long:"secure" description:"Use LDAPS. This will not verify TLS certs, however. (default: false)"`
-	ResolveHosts   bool   `short:"r" long:"resolve" description:"Resolve IP addresses for enumerated computer names. Will make DNS queries against system NS"`
-	Attributes     []string `long:"attrs" description:"Comma separated custom atrribute names to display (e.g. 'badPwdCount,lastLogon')"`
-	FullAttributes bool   `long:"full" description:"Output all attributes from LDAP"`
-	Output      string `short:"o" long:"output" description:"Save results to file"`
-	JSON bool `short:"j" long:"json" description:"Output as JSON format"`
+	ResolveHosts   bool
+	Attributes     []string
+	FullAttributes bool
+	Output      string
+	JSON bool
 	Module string
 	Interactive bool
 }
 
 
-type ModuleOptions struct {
-	FlagSet *flag.FlagSet
-}
-
 func NewSession() *WindapSearchSession {
 	var w WindapSearchSession
 
-	wFlags := flag.NewFlagSet("WindapSearch", flag.ExitOnError)
+	wFlags := pflag.NewFlagSet("WindapSearch", pflag.ContinueOnError)
 	wFlags.SortFlags = false
 	wFlags.StringVarP(&w.Options.Domain, "domain", "d", "", "The FQDN of the domain (e.g. 'lab.example.com'). Only needed if dc not provided")
 	wFlags.StringVar(&w.Options.DomainController, "dc", "", "The Domain Controller to query against")
@@ -69,12 +77,17 @@ func NewSession() *WindapSearchSession {
 	wFlags.StringVarP(&w.Options.Output, "output", "o", "", "Save results to file")
 	wFlags.BoolVarP(&w.Options.JSON, "json", "j", false, "Convert LDAP output to JSON" )
 	wFlags.BoolVarP(&w.Options.Interactive, "interactive", "i", false, "Start in interactive mode")
+	wFlags.BoolVarP(&w.Options.Help, "help", "h", false, "Show this help")
+
+	pflag.ErrHelp = errors.New("")
+	wFlags.Usage = w.ShowUsage
 
 	for _, m := range modules.AllModules {
 		w.RegisterModule(m)
 	}
 
-	wFlags.StringVarP(&w.Options.Module, "module", "m", "", fmt.Sprintf("Module to use. Available modules: \n[ %s ]", w.ModuleListString()))
+	//wFlags.StringP("module", "m", "", fmt.Sprintf("Module to use. Available modules: \n[ %s ]", w.ModuleListString()))
+	wFlags.StringVarP(&w.Options.Module, "module", "m", "", "Module to use")
 
 	w.Options.FlagSet = wFlags
 
@@ -83,12 +96,12 @@ func NewSession() *WindapSearchSession {
 }
 
 func (w *WindapSearchSession) RegisterModule(mod modules.Module) {
-	w.Modules = append(w.Modules, mod)
+	w.AllModules = append(w.AllModules, mod)
 }
 
 func (w *WindapSearchSession) ModuleListString() string {
 	var sb strings.Builder
-	for _, mod := range w.Modules {
+	for _, mod := range w.AllModules {
 		sb.WriteString(mod.Name())
 		sb.WriteString(", ")
 	}
@@ -98,19 +111,30 @@ func (w *WindapSearchSession) ModuleListString() string {
 
 func (w *WindapSearchSession) ModuleDescriptionString() string {
 	var sb strings.Builder
-	for _, mod := range w.Modules {
+	for _, mod := range w.AllModules {
 		sb.WriteString(fmt.Sprintf("\t%s\t\t%s\n", mod.Name(), mod.Description()))
 	}
 	return sb.String()
 }
 
 func (w *WindapSearchSession) GetModuleByName(name string) modules.Module {
-	for _, m := range w.Modules {
+	for _, m := range w.AllModules {
 		if m.Name() == name {
 			return m
 		}
 	}
 	return nil
+}
+
+func (w *WindapSearchSession) ShowUsage() {
+	fmt.Fprintf(os.Stderr, "windapsearch: a tool to perform Windows domain enumeration through LDAP queries\n\nUsage: %s [options] -m [module]\n\nOptions:\n", os.Args[0])
+	w.Options.FlagSet.PrintDefaults()
+	if w.Module == nil {
+		fmt.Fprintf(os.Stderr, "\nAvailable modules:\n%s", w.ModuleDescriptionString())
+	} else {
+		fmt.Fprintf(os.Stderr, "\nOptions for %q module:\n", w.Module.Name())
+		w.Module.FlagSet().PrintDefaults()
+	}
 }
 
 func (w *WindapSearchSession) Run() (err error) {
@@ -120,6 +144,14 @@ func (w *WindapSearchSession) Run() (err error) {
 
 	w.Options.FlagSet.Parse(os.Args[:])
 
+	w.LoadModule()
+
+
+	if w.Options.Help {
+		w.ShowUsage()
+		return
+	}
+
 	if w.Options.Output != "" {
 		fp, err2 := os.Create(w.Options.Output)
 		if err2 != nil { err = err2; return }
@@ -128,14 +160,15 @@ func (w *WindapSearchSession) Run() (err error) {
 	}
 
 	if w.Options.Domain == "" && w.Options.DomainController == "" {
-		w.Options.FlagSet.PrintDefaults()
+		w.ShowUsage()
+		fmt.Println()
 		fmt.Println("[!] You must specify either a domain or an IP address of a domain controller")
 		return
 	}
 	password := w.Options.Password
 	if w.Options.Username != "" && password == "" {
 		password, err = utils.SecurePrompt(fmt.Sprintf("Password for [%s]", w.Options.Username))
-		if err != nil { return }
+		if err != nil { return err }
 	}
 
 	ldapOptions := ldapsession.LDAPSessionOptions{
@@ -158,19 +191,33 @@ func (w *WindapSearchSession) Run() (err error) {
 	}
 }
 
+func (w *WindapSearchSession) LoadModule() {
+	mod := w.GetModuleByName(w.Options.Module)
+	if mod != nil {
+		w.Module = mod
+	}
+}
+
 func (w *WindapSearchSession) StartCLI() error {
-	if w.Options.Module == "" {
-		fmt.Printf("[!] You must specify a module to use\n")
+	if w.Module == nil {
+		fmt.Printf("[!] You must specify a valid module to use\n")
 		fmt.Printf(" Available modules: \n%s", w.ModuleDescriptionString())
 		return nil
 	}
 
 	mod := w.GetModuleByName(w.Options.Module)
 	if mod == nil {
+		w.ShowUsage()
+		fmt.Println()
 		fmt.Printf("[!] Module %q not found\n", w.Options.Module)
-		fmt.Printf(" Available modules: \n%s", w.ModuleDescriptionString())
 		return nil
 	}
+
+	modFlags := mod.FlagSet()
+	modFlags.AddFlagSet(w.Options.FlagSet)
+	modFlags.Parse(os.Args[:])
+
+
 
 	var attrs []string
 	if w.Options.FullAttributes {
