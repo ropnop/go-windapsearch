@@ -7,14 +7,15 @@ import (
 )
 
 func WriteSearchResults(result *ldap.SearchResult, writer io.Writer) {
-	if result == nil {
-		io.WriteString(writer, "[-] No results")
+	if result == nil || len(result.Entries) == 0 {
+		io.WriteString(writer, "[-] No results\n")
 		return
 	}
 	for _, entry := range result.Entries {
 		for _, attribute := range entry.Attributes {
-			for _, value := range attribute.Values {
-				io.WriteString(writer, fmt.Sprintf("%v: %v\n", attribute.Name, value))
+			for _, value := range attribute.ByteValues {
+				valueString := HandleLDAPBytes(attribute.Name, value)
+				io.WriteString(writer, fmt.Sprintf("%s: %v\n", attribute.Name, valueString))
 			}
 		}
 		io.WriteString(writer, "\n")

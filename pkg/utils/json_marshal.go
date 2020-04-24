@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"gopkg.in/ldap.v3"
 	"unicode/utf8"
@@ -31,7 +32,7 @@ func SearchResultToJSON(result *ldap.SearchResult) (jResponse []byte, err error)
 }
 
 // HandleLDAPBytes takes a byte slice from a raw attribute value and returns either a UTF8 string (if it's a string),
-// or GUID or timestamp
+// or GUID or timestampgit s
 func HandleLDAPBytes(name string, b []byte) interface{} {
 	if name == "objectGUID" {
 		g, err := WindowsGuidFromBytes(b); if err != nil {
@@ -49,7 +50,7 @@ func HandleLDAPBytes(name string, b []byte) interface{} {
 	if utf8.Valid(b) {
 		s := string(b)
 		if s == "9223372036854775807" { //max int64 size
-			return nil //basically a no-value (e.g. never expires)
+			return 0 //basically a no-value (e.g. never expires)
 		}
 		if NTFileTimeRegex.Match(b) {
 			timeStamp, err := NTFileTimeToTimestamp(s)
@@ -67,7 +68,7 @@ func HandleLDAPBytes(name string, b []byte) interface{} {
 		}
 		return s
 	}
-	return b
+	return base64.StdEncoding.EncodeToString(b)
 }
 
 
