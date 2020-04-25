@@ -28,7 +28,7 @@ func init() {
 }
 
 func (DAModule) Name() string {
-	return "das"
+	return "domain-admins"
 }
 
 func (DAModule) Description() string {
