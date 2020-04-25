@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/base64"
 	"encoding/json"
+	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"gopkg.in/ldap.v3"
 	"unicode/utf8"
 )
@@ -28,6 +29,9 @@ func SearchResultToJSON(result *ldap.SearchResult) (jResponse []byte, err error)
 		}
 		ldapResponsesJSON = append(ldapResponsesJSON, jEntry)
 	}
+	if len(ldapResponsesJSON) == 1 {
+		return json.Marshal(ldapResponsesJSON[0])
+	}
 	return json.Marshal(ldapResponsesJSON)
 }
 
@@ -45,6 +49,16 @@ func HandleLDAPBytes(name string, b []byte) interface{} {
 			return b
 		}
 		return s
+	}
+
+	if name == "domainFunctionality" {
+		return ldapsession.FunctionalityLevelsMapping[string(b)]
+	}
+	if name == "forestFunctionality" {
+		return ldapsession.FunctionalityLevelsMapping[string(b)]
+	}
+	if name == "domainControllerFunctionality" {
+		return ldapsession.FunctionalityLevelsMapping[string(b)]
 	}
 
 	if utf8.Valid(b) {
