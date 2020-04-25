@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"gopkg.in/ldap.v3"
+	"strconv"
 	"unicode/utf8"
 )
 
@@ -79,6 +80,9 @@ func HandleLDAPBytes(name string, b []byte) interface{} {
 				return s
 			}
 			return timeStamp
+		}
+		if i, err := strconv.Atoi(s); err == nil {
+			return i
 		}
 		return s
 	}
