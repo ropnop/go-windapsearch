@@ -9,7 +9,6 @@ import (
 type Module interface {
 	Name() string
 	Description() string
-	Filter() string
 	FlagSet() *pflag.FlagSet
 	DefaultAttrs() []string
 	Run(session *ldapsession.LDAPSession, attrs []string) (*ldap.SearchResult, error)
