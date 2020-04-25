@@ -19,9 +19,9 @@ type LDAPSessionOptions struct {
 }
 
 type LDAPSession struct {
-	lConn  *ldap.Conn
-	BaseDN string
-	attrs  []string
+	LConn      *ldap.Conn
+	BaseDN     string
+	attrs      []string
 	DomainInfo DomainInfo
 }
 
@@ -58,7 +58,7 @@ func NewLDAPSession(options *LDAPSessionOptions) (sess *LDAPSession, err error) 
 		lConn.StartTLS(&tls.Config{InsecureSkipVerify: true})
 	}
 	sess = &LDAPSession{
-		lConn: lConn,
+		LConn: lConn,
 	}
 	err = sess.Bind(options.Username, options.Password)
 	if err != nil {
@@ -73,9 +73,9 @@ func NewLDAPSession(options *LDAPSessionOptions) (sess *LDAPSession, err error) 
 
 func (w *LDAPSession) Bind(username, password string) (err error) {
 	if username == "" {
-		err = w.lConn.UnauthenticatedBind("")
+		err = w.LConn.UnauthenticatedBind("")
 	} else {
-		err = w.lConn.Bind(username, password)
+		err = w.LConn.Bind(username, password)
 	}
 	if err != nil {
 		return
@@ -84,7 +84,7 @@ func (w *LDAPSession) Bind(username, password string) (err error) {
 }
 
 func (w *LDAPSession) Close() {
-	w.lConn.Close()
+	w.LConn.Close()
 }
 
 func (w *LDAPSession) getMetaData() (err error) {
@@ -96,7 +96,7 @@ func (w *LDAPSession) getMetaData() (err error) {
 		"(objectClass=*)",
 		[]string{"*"},
 		nil)
-	res, err := w.lConn.Search(sr)
+	res, err := w.LConn.Search(sr)
 	if err != nil {
 		return
 	}

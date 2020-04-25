@@ -17,7 +17,7 @@ func (w *LDAPSession) MakeSimpleSearchRequest(filter string, attrs []string) *ld
 }
 
 func (w *LDAPSession) GetSearchResults(request *ldap.SearchRequest) (result *ldap.SearchResult, err error) {
-	return w.lConn.SearchWithPaging(request, 1000)
+	return w.LConn.SearchWithPaging(request, 1000)
 }
 
 func (w *LDAPSession) AddExtraFilter(filter, extra string) string {
