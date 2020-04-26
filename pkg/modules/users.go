@@ -45,7 +45,15 @@ func (u *UsersModule) DefaultAttrs() []string {
 
 func (u *UsersModule) Run(lSession *ldapsession.LDAPSession, attrs []string) (results *ldap.SearchResult, err error) {
 	searchReq := lSession.MakeSimpleSearchRequest(u.Filter(), attrs)
-	return lSession.GetSearchResults(searchReq)
+	//return lSession.GetSearchResults(searchReq)
+	ch := make(chan *ldap.Entry)
+	go func() {
+		for r := range ch {
+				fmt.Printf("[+] Got an entry! %s\n", r.DN)
+		}
+	}()
+	err = lSession.SearchWithPagingToChannel(searchReq, ch, 1000)
+	return
 }
 
 
