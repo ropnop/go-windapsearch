@@ -17,39 +17,40 @@ func (w *LDAPSession) MakeSimpleSearchRequest(filter string, attrs []string) *ld
 		nil)
 }
 
+// GetSearchResults is a synchronous operation that will populate and return an ldap.SearchResult object
 func (w *LDAPSession) GetSearchResults(request *ldap.SearchRequest) (result *ldap.SearchResult, err error) {
 	return w.LConn.SearchWithPaging(request, 1000)
 }
 
-func (w *LDAPSession) AddExtraFilter(filter, extra string) string {
-	return fmt.Sprintf("(&(%s)(%s))", filter, extra)
-}
+// ExecuteSearchRequest performs a paged search and writes results to the LDAPsession's defined results channel.
+// it only returns an err
+func (w *LDAPSession) ExecuteSearchRequest(searchRequest *ldap.SearchRequest) (err error) {
+	if w.resultsChan == nil {
+		return fmt.Errorf("no channel defined. Call SetChannel first, or use GetSearchResults instead")
+	}
 
-func (w *LDAPSession) SearchWithPagingToChannel(searchRequest *ldap.SearchRequest, ch chan *ldap.Entry, pagingSize uint32) error {
+	defer close(w.resultsChan)
+
 	// basically a re-implementation of the standard function: https://github.com/go-ldap/ldap/blob/master/v3/search.go#L253
 	// but writes entries to a channel as it gets them instead of waiting for all pages to complete
-
-	defer close(ch)
-
 
 
 	var pagingControl *ldap.ControlPaging
 	control := ldap.FindControl(searchRequest.Controls, ldap.ControlTypePaging)
 	if control == nil {
-		pagingControl = ldap.NewControlPaging(pagingSize)
+		pagingControl = ldap.NewControlPaging(w.PageSize)
 		searchRequest.Controls = append(searchRequest.Controls, pagingControl)
 	} else {
 		castControl, ok := control.(*ldap.ControlPaging)
 		if !ok {
 			return fmt.Errorf("expected paging control to be of type *ControlPaging, got %v", control)
 		}
-		if castControl.PagingSize != pagingSize {
-			return fmt.Errorf("paging size given in search request (%d) conflicts with size given in search call (%d)", castControl.PagingSize, pagingSize)
+		if castControl.PagingSize != w.PageSize {
+			return fmt.Errorf("paging size given in search request (%d) conflicts with size given in search call (%d)", castControl.PagingSize, w.PageSize)
 		}
 		pagingControl = castControl
 	}
 
-	searchResult := new(ldap.SearchResult)
 	for {
 		result, err := w.LConn.Search(searchRequest)
 		w.LConn.Debug.Printf("Looking for Paging Control...")
@@ -61,15 +62,17 @@ func (w *LDAPSession) SearchWithPagingToChannel(searchRequest *ldap.SearchReques
 		}
 
 		for _, entry := range result.Entries {
-			ch <- entry
-			searchResult.Entries = append(searchResult.Entries, entry)
+			w.resultsChan <- entry
 		}
-		for _, referral := range result.Referrals {
-			searchResult.Referrals = append(searchResult.Referrals, referral)
-		}
-		for _, control := range result.Controls {
-			searchResult.Controls = append(searchResult.Controls, control)
-		}
+
+		// I don't use these, but keeping them here just in case
+		// TODO: add support for Referrals and Controls channels
+		//for _, referral := range result.Referrals {
+		//	//todo
+		//}
+		//for _, control := range result.Controls {
+		//	//todo
+		//}
 
 		w.LConn.Debug.Printf("Looking for Paging Control...")
 		pagingResult := ldap.FindControl(result.Controls, ldap.ControlTypePaging)

@@ -3,7 +3,6 @@ package modules
 import (
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/spf13/pflag"
-	"gopkg.in/ldap.v3"
 )
 
 type Module interface {
@@ -11,7 +10,7 @@ type Module interface {
 	Description() string
 	FlagSet() *pflag.FlagSet
 	DefaultAttrs() []string
-	Run(session *ldapsession.LDAPSession, attrs []string) (*ldap.SearchResult, error)
+	Run(session *ldapsession.LDAPSession, attrs []string) error
 }
 
 var AllModules []Module

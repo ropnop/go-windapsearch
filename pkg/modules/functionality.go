@@ -34,7 +34,7 @@ func (FunctionalityModule) DefaultAttrs() []string {
 	}
 }
 
-func (FunctionalityModule) Run(session *ldapsession.LDAPSession, attrs []string) (*ldap.SearchResult, error) {
+func (FunctionalityModule) Run(session *ldapsession.LDAPSession, attrs []string) error {
 	sr := ldap.NewSearchRequest(
 		"",
 		ldap.ScopeBaseObject,
@@ -43,6 +43,6 @@ func (FunctionalityModule) Run(session *ldapsession.LDAPSession, attrs []string)
 		"(objectClass=*)",
 		attrs,
 		nil)
-	return session.LConn.Search(sr)
+	return session.ExecuteSearchRequest(sr)
 }
 

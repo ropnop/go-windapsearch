@@ -36,6 +36,22 @@ func SearchResultToJSON(result *ldap.SearchResult) (jResponse []byte, err error)
 	return json.Marshal(ldapResponsesJSON)
 }
 
+func EntryToJSON(entry *ldap.Entry) (jResponse []byte, err error) {
+	jEntry := make(LDAPEntryJSON)
+	for _, attribute := range entry.Attributes {
+		if len(attribute.Values) == 1 {
+			jEntry[attribute.Name] = HandleLDAPBytes(attribute.Name, attribute.ByteValues[0])
+		} else {
+			var vals []interface{}
+			for _, val := range attribute.ByteValues {
+				vals = append(vals, HandleLDAPBytes(attribute.Name, val))
+			}
+			jEntry[attribute.Name] = vals
+		}
+	}
+	return json.Marshal(jEntry)
+}
+
 // HandleLDAPBytes takes a byte slice from a raw attribute value and returns either a UTF8 string (if it's a string),
 // or GUID or timestampgit s
 func HandleLDAPBytes(name string, b []byte) interface{} {

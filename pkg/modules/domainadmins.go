@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/spf13/pflag"
-	"gopkg.in/ldap.v3"
 	"strings"
 )
 
@@ -55,9 +54,9 @@ func (DAModule) DefaultAttrs() []string {
 	return []string{"cn", "sAMAccountName"}
 }
 
-func (d DAModule) Run(session *ldapsession.LDAPSession, attrs []string) (*ldap.SearchResult, error) {
+func (d DAModule) Run(session *ldapsession.LDAPSession, attrs []string) error {
 	filter := d.Filter(session.BaseDN)
 	searchReq := session.MakeSimpleSearchRequest(filter, attrs)
-	return session.GetSearchResults(searchReq)
+	return session.ExecuteSearchRequest(searchReq)
 }
 

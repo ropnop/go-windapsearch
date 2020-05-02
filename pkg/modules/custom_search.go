@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/spf13/pflag"
-	"gopkg.in/ldap.v3"
 )
 
 type CustomSearch struct {
@@ -37,13 +36,12 @@ func (c *CustomSearch) DefaultAttrs() []string {
 	return []string{"*"}
 }
 
-func (c *CustomSearch) Run(lSession *ldapsession.LDAPSession, attrs []string) (results *ldap.SearchResult, err error) {
+func (c *CustomSearch) Run(lSession *ldapsession.LDAPSession, attrs []string) error {
 	if c.Filter() == "" {
-		err = fmt.Errorf("Must provide a filter to run!")
-		return
+		return fmt.Errorf("Must provide a filter to run!")
 	}
 	searchReq := lSession.MakeSimpleSearchRequest(c.Filter(), attrs)
-	return lSession.GetSearchResults(searchReq)
+	return lSession.ExecuteSearchRequest(searchReq)
 }
 
 

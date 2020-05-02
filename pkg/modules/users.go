@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/spf13/pflag"
-	"gopkg.in/ldap.v3"
 )
 
 type UsersModule struct {
@@ -43,17 +42,10 @@ func (u *UsersModule) DefaultAttrs() []string {
 	return []string{"cn", "sAMAccountName"}
 }
 
-func (u *UsersModule) Run(lSession *ldapsession.LDAPSession, attrs []string) (results *ldap.SearchResult, err error) {
+func (u *UsersModule) Run(lSession *ldapsession.LDAPSession, attrs []string) error {
 	searchReq := lSession.MakeSimpleSearchRequest(u.Filter(), attrs)
-	//return lSession.GetSearchResults(searchReq)
-	ch := make(chan *ldap.Entry)
-	go func() {
-		for r := range ch {
-				fmt.Printf("[+] Got an entry! %s\n", r.DN)
-		}
-	}()
-	err = lSession.SearchWithPagingToChannel(searchReq, ch, 1000)
-	return
+	return lSession.ExecuteSearchRequest(searchReq)
+
 }
 
 

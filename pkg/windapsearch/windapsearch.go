@@ -7,7 +7,6 @@ import (
 	"github.com/ropnop/go-windapsearch/pkg/modules"
 	"github.com/ropnop/go-windapsearch/pkg/utils"
 	"github.com/spf13/pflag"
-	"gopkg.in/ldap.v3"
 	"io"
 	"os"
 	"strings"
@@ -216,19 +215,10 @@ func (w *WindapSearchSession) StartCLI() error {
 	w.Options.ModuleFlags.Parse(os.Args[:])
 
 
-
-	var attrs []string
-	if w.Options.FullAttributes {
-		attrs = []string{"*"}
-	} else {
-		attrs = w.Options.Attributes
+	err := w.runModule()
+	if err != nil {
+		return err
 	}
-	results, err := w.Module.Run(w.LDAPSession, attrs)
-	if err != nil  { return err }
-
-
-	err = w.handleResults(results)
-	if err != nil { return err }
 	if w.Options.Output != "" {
 		fmt.Printf("[+] %s written\n", w.Options.Output)
 	}
@@ -239,19 +229,7 @@ func (w *WindapSearchSession) StartTUI() error {
 	return nil
 }
 
-func (w *WindapSearchSession) handleResults(results *ldap.SearchResult) error {
-	if w.Options.JSON {
-		jResults, err := utils.SearchResultToJSON(results)
-		if err != nil {
-			return err
-		}
-		w.OutputWriter.Write(jResults)
-	} else {
-		utils.WriteSearchResults(results, w.OutputWriter)
-	}
-	return nil
 
-}
 
 
 

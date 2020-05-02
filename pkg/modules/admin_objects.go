@@ -3,7 +3,6 @@ package modules
 import (
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/spf13/pflag"
-	"gopkg.in/ldap.v3"
 )
 
 type AdminObjects struct{}
@@ -28,9 +27,9 @@ func (AdminObjects) DefaultAttrs() []string {
 	return []string{"distinguishedName"}
 }
 
-func (AdminObjects) Run(session *ldapsession.LDAPSession, attrs []string) (*ldap.SearchResult, error) {
+func (AdminObjects) Run(session *ldapsession.LDAPSession, attrs []string) (error) {
 	filter := "(adminCount=1)"
 	sr := session.MakeSimpleSearchRequest(filter, attrs)
-	return session.GetSearchResults(sr)
+	return session.ExecuteSearchRequest(sr)
 }
 

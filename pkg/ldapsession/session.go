@@ -20,9 +20,11 @@ type LDAPSessionOptions struct {
 
 type LDAPSession struct {
 	LConn      *ldap.Conn
+	PageSize uint32
 	BaseDN     string
 	attrs      []string
 	DomainInfo DomainInfo
+	resultsChan chan *ldap.Entry
 }
 
 func NewLDAPSession(options *LDAPSessionOptions) (sess *LDAPSession, err error) {
@@ -60,6 +62,7 @@ func NewLDAPSession(options *LDAPSessionOptions) (sess *LDAPSession, err error) 
 	sess = &LDAPSession{
 		LConn: lConn,
 	}
+	sess.PageSize = 1000
 	err = sess.Bind(options.Username, options.Password)
 	if err != nil {
 		return
@@ -69,6 +72,10 @@ func NewLDAPSession(options *LDAPSessionOptions) (sess *LDAPSession, err error) 
 		return
 	}
 	return sess, nil
+}
+
+func (w *LDAPSession) SetChannel(ch chan *ldap.Entry) {
+	w.resultsChan = ch
 }
 
 func (w *LDAPSession) Bind(username, password string) (err error) {
