@@ -3,6 +3,7 @@ package ldapsession
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/ropnop/go-windapsearch/pkg/adschema"
 	"github.com/ropnop/go-windapsearch/pkg/dns"
 	"gopkg.in/ldap.v3"
 )
@@ -117,9 +118,9 @@ func (w *LDAPSession) getMetaData() (err error) {
 	domainFunctionality := res.Entries[0].GetAttributeValue("domainFunctionality")
 	forestFunctionality := res.Entries[0].GetAttributeValue("forestFunctionality")
 	domainControllerFunctionality := res.Entries[0].GetAttributeValue("domainControllerFunctionality")
-	w.DomainInfo.DomainFunctionalityLevel = FunctionalityLevelsMapping[domainFunctionality]
-	w.DomainInfo.ForestFunctionalityLevel = FunctionalityLevelsMapping[forestFunctionality]
-	w.DomainInfo.DomainControllerFunctionalityLevel = FunctionalityLevelsMapping[domainControllerFunctionality]
+	w.DomainInfo.DomainFunctionalityLevel = adschema.FunctionalityLevelsMapping[domainFunctionality]
+	w.DomainInfo.ForestFunctionalityLevel = adschema.FunctionalityLevelsMapping[forestFunctionality]
+	w.DomainInfo.DomainControllerFunctionalityLevel = adschema.FunctionalityLevelsMapping[domainControllerFunctionality]
 	w.DomainInfo.ServerDNSName = res.Entries[0].GetAttributeValue("dnsHostName")
 	w.BaseDN = defaultNamingContext
 	return nil

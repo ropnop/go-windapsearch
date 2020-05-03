@@ -18,6 +18,8 @@ type WindapSearchSession struct {
 	Module modules.Module
 	AllModules   []modules.Module
 	OutputWriter io.Writer
+	Threads int
+	doneChan chan bool
 }
 
 
@@ -92,6 +94,8 @@ func NewSession() *WindapSearchSession {
 	w.Options.FlagSet = wFlags
 
 	w.OutputWriter = os.Stdout //default to stdout
+	w.Threads = 10 //default to 10
+	w.doneChan = make(chan bool)
 	return &w
 }
 

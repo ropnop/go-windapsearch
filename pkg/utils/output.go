@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"github.com/ropnop/go-windapsearch/pkg/adschema"
 	"gopkg.in/ldap.v3"
 	"io"
 )
@@ -25,7 +26,7 @@ func WriteEntry(entry *ldap.Entry, writer io.Writer) {
 	}
 	for _, attribute := range entry.Attributes {
 		for _, value := range attribute.ByteValues {
-			valueString := HandleLDAPBytes(attribute.Name, value)
+			valueString := adschema.HandleLDAPBytes(attribute.Name, value)
 			io.WriteString(writer, fmt.Sprintf("%s: %v\n", attribute.Name, valueString))
 		}
 	}

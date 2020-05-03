@@ -52,6 +52,7 @@ func (w *LDAPSession) ExecuteSearchRequest(searchRequest *ldap.SearchRequest) (e
 	}
 
 	for {
+		//fmt.Fprintf(os.Stderr, "making paged request...\n")
 		result, err := w.LConn.Search(searchRequest)
 		w.LConn.Debug.Printf("Looking for Paging Control...")
 		if err != nil {
@@ -64,6 +65,7 @@ func (w *LDAPSession) ExecuteSearchRequest(searchRequest *ldap.SearchRequest) (e
 		for _, entry := range result.Entries {
 			w.resultsChan <- entry
 		}
+		//fmt.Fprintf(os.Stderr, "placed %d entries on channel...\n", len(result.Entries))
 
 		// I don't use these, but keeping them here just in case
 		// TODO: add support for Referrals and Controls channels
