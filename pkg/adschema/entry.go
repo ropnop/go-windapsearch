@@ -9,7 +9,6 @@ import (
 	"unicode/utf8"
 )
 
-
 type ADEntry struct {
 	*ldap.Entry
 }
@@ -22,27 +21,25 @@ func (e *ADEntry) LDAPFormat() string {
 	var sb strings.Builder
 	for _, attribute := range e.Attributes {
 		for _, value := range attribute.ByteValues {
-			valueString := HandleLDAPBytes(attribute.Name, value)
-			sb.WriteString(fmt.Sprintf("%s: %v\n", attribute.Name, valueString))
+			//valueString := HandleLDAPBytes(attribute.Name, value)
+			sb.WriteString(fmt.Sprintf("%s: %v\n", attribute.Name, printable(value)))
 		}
 	}
 	return sb.String()
 }
 
-
-
 // HandleLDAPBytes takes a byte slice from a raw attribute value and returns either a UTF8 string (if it's a string),
 // or GUID or timestamp
 func HandleLDAPBytes(name string, b []byte) interface{} {
 	if name == "objectGUID" {
-		g, err := WindowsGuidFromBytes(b);
+		g, err := WindowsGuidFromBytes(b)
 		if err != nil {
 			return b
 		}
 		return g
 	}
 	if name == "objectSid" {
-		s, err := WindowsSIDFromBytes(b);
+		s, err := WindowsSIDFromBytes(b)
 		if err != nil {
 			return b
 		}
@@ -85,6 +82,3 @@ func HandleLDAPBytes(name string, b []byte) interface{} {
 	}
 	return base64.StdEncoding.EncodeToString(b)
 }
-
-
-

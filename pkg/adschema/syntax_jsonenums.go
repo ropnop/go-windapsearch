@@ -7,46 +7,6 @@ import (
 	"fmt"
 )
 
-var (
-	_syntaxNameToValue = map[string]syntax{
-		"Boolean":                     Boolean,
-		"Enumeration":                 Enumeration,
-		"Interval":                    Interval,
-		"Object_Access_Point":         Object_Access_Point,
-		"Object_DN_Binary":            Object_DN_Binary,
-		"Object_DS_DN":                Object_DS_DN,
-		"Object_Presentation_Address": Object_Presentation_Address,
-		"Object_Replica_Link":         Object_Replica_Link,
-		"String_Generalized_Time":     String_Generalized_Time,
-		"String_IA5":                  String_IA5,
-		"String_NT_Sec_Desc":          String_NT_Sec_Desc,
-		"String_Numeric":              String_Numeric,
-		"String_Object_Identifier":    String_Object_Identifier,
-		"String_Sid":                  String_Sid,
-		"String_Teletex":              String_Teletex,
-		"String_Unicode":              String_Unicode,
-	}
-
-	_syntaxValueToName = map[syntax]string{
-		Boolean:                     "Boolean",
-		Enumeration:                 "Enumeration",
-		Interval:                    "Interval",
-		Object_Access_Point:         "Object_Access_Point",
-		Object_DN_Binary:            "Object_DN_Binary",
-		Object_DS_DN:                "Object_DS_DN",
-		Object_Presentation_Address: "Object_Presentation_Address",
-		Object_Replica_Link:         "Object_Replica_Link",
-		String_Generalized_Time:     "String_Generalized_Time",
-		String_IA5:                  "String_IA5",
-		String_NT_Sec_Desc:          "String_NT_Sec_Desc",
-		String_Numeric:              "String_Numeric",
-		String_Object_Identifier:    "String_Object_Identifier",
-		String_Sid:                  "String_Sid",
-		String_Teletex:              "String_Teletex",
-		String_Unicode:              "String_Unicode",
-	}
-)
-
 func init() {
 	var v syntax
 	if _, ok := interface{}(v).(fmt.Stringer); ok {

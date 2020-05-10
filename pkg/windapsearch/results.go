@@ -4,28 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ropnop/go-windapsearch/pkg/adschema"
-	"github.com/ropnop/go-windapsearch/pkg/utils"
 	"gopkg.in/ldap.v3"
 	"io"
 	"os"
 	"sync"
 )
 
-func (w *WindapSearchSession) handleResults(results *ldap.SearchResult) error {
-	if w.Options.JSON {
-		jResults, err := utils.SearchResultToJSON(results)
-		if err != nil {
-			return err
-		}
-		w.OutputWriter.Write(jResults)
-	} else {
-		utils.WriteSearchResults(results, w.OutputWriter)
-	}
-	return nil
-}
-func (w* WindapSearchSession) setupWorkers(entryChan chan *ldap.Entry, wg *sync.WaitGroup) {
 
-}
 
 
 func (w *WindapSearchSession) outputWorker(in chan []byte) {
