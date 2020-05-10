@@ -1,13 +1,14 @@
 package modules
 
 import (
-	"fmt"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
+	"github.com/ropnop/go-windapsearch/pkg/utils"
 	"github.com/spf13/pflag"
 )
 
 type UsersModule struct {
 	ExtraFilter string
+	SearchTerm string
 }
 
 func init() {
@@ -25,7 +26,11 @@ func (u *UsersModule) Description() string {
 func (u *UsersModule) Filter() string {
 	filter := "(objectcategory=user)"
 	if u.ExtraFilter != "" {
-		return fmt.Sprintf("(&%s(%s))", filter, u.ExtraFilter)
+		//return fmt.Sprintf("(&%s(%s))", filter, u.ExtraFilter)
+		filter = utils.AddAndFilter(filter, u.ExtraFilter)
+	}
+	if u.SearchTerm != "" {
+		filter = utils.AddAndFilter(filter, utils.CreateANRSearch(u.SearchTerm))
 	}
 	return filter
 
@@ -35,6 +40,7 @@ func (u *UsersModule) Filter() string {
 func (u *UsersModule) FlagSet() *pflag.FlagSet {
 	flags := pflag.NewFlagSet(u.Name(), pflag.ExitOnError)
 	flags.StringVar(&u.ExtraFilter, "filter", "", "Extra LDAP syntax filter to use")
+	flags.StringVarP(&u.SearchTerm, "search", "s", "", "Search term to filter on")
 	return flags
 }
 
