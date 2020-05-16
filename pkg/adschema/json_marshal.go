@@ -31,7 +31,9 @@ type ADAttribute struct {
 //}
 
 func (e *ADEntry) MarshalJSON() ([]byte, error) {
-	jEntry := make(map[string]*ADAttribute)
+	//jEntry := make(map[string]*ADAttribute)
+	jEntry := make(map[string]interface{})
+	jEntry["dn"] = e.DN
 	for _, attribute := range e.Attributes {
 		jEntry[attribute.Name] = &ADAttribute{attribute}
 	}
