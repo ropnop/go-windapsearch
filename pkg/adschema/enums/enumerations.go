@@ -1,4 +1,4 @@
-package adschema
+package enums
 
 import (
 	uac "github.com/audibleblink/msldapuac"
@@ -13,6 +13,7 @@ var EnumFuncs = map[string]ConvertEnum {
 		return val
 	},
 	"userAccountControl": ConvertUAC,
+	"groupType": ConvertGroupType,
 
 }
 
@@ -40,6 +41,7 @@ func ConvertUAC(i int64) interface{} {
 	}
 	return flags
 }
+
 
 
 

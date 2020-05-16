@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/bwmarrin/go-objectsid"
-	"os"
+	"github.com/ropnop/go-windapsearch/pkg/adschema/enums"
 	"strconv"
 	"time"
 )
@@ -104,13 +104,12 @@ func ConvertObjectReplicaLink(name string, b []byte) (interface{}, error) {
 func ConvertEnumeration(name string, b []byte) (interface{}, error) {
 	// https://docs.microsoft.com/en-us/windows/win32/adschema/s-enumeration
 	// Active Directory treats this as an integer.
-	fmt.Fprintf(os.Stderr, "got enum: %s\n", name)
 	val, err := strconv.ParseInt(string(b), 10, 64)
 	if err != nil {
 		return 0, err
 	}
-	if _, ok := EnumFuncs[name]; ok {
-		return EnumFuncs[name](val), nil
+	if _, ok := enums.EnumFuncs[name]; ok {
+		return enums.EnumFuncs[name](val), nil
 	}
 	return val, nil
 }
