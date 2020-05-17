@@ -3,9 +3,22 @@ package utils
 import (
 	"fmt"
 	"github.com/tcnksm/go-input"
+	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/ldap.v3"
 	"os"
+	"syscall"
 )
+
+func SecurePrompt(message string) (response string, err error) {
+	fmt.Fprintf(os.Stderr, "%s: ", message)
+	securebytes, err := terminal.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return
+	}
+	fmt.Fprint(os.Stderr, "\n")
+	return string(securebytes), nil
+}
+
 
 func ChooseDN(results *ldap.SearchResult) (dn string, err error) {
 	var options []string
