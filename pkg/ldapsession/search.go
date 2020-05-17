@@ -22,6 +22,13 @@ func (w *LDAPSession) GetSearchResults(request *ldap.SearchRequest) (result *lda
 	return w.LConn.SearchWithPaging(request, 1000)
 }
 
+func (w *LDAPSession) ManualWriteSearchResultsToChan(results *ldap.SearchResult) {
+	for _, entry := range results.Entries {
+		w.resultsChan <- entry
+	}
+	close(w.resultsChan)
+}
+
 // ExecuteSearchRequest performs a paged search and writes results to the LDAPsession's defined results channel.
 // it only returns an err
 func (w *LDAPSession) ExecuteSearchRequest(searchRequest *ldap.SearchRequest) (err error) {

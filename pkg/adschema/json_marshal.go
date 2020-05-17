@@ -33,7 +33,9 @@ type ADAttribute struct {
 func (e *ADEntry) MarshalJSON() ([]byte, error) {
 	//jEntry := make(map[string]*ADAttribute)
 	jEntry := make(map[string]interface{})
-	jEntry["dn"] = e.DN
+	if e.DN != "" {
+		jEntry["dn"] = e.DN
+	}
 	for _, attribute := range e.Attributes {
 		jEntry[attribute.Name] = &ADAttribute{attribute}
 	}
@@ -44,7 +46,13 @@ func (e *ADAttribute) MarshalJSON() ([]byte, error) {
 	// Look up syntax for attribute name
 	info, ok := AttributeMap[e.Name]
 	if !ok {
-		return marshalUnknownAttribute(e)
+		// check if its a root DSE attribute
+		_, ok := RootDSEAttributeMap[e.Name]
+		if ok {
+			return marshalRootDSEAttribute(e)
+		} else {
+			return marshalUnknownAttribute(e)
+		}
 	}
 	convert, ok := SyntaxFunctions[info.Syntax]
 	if !ok {

@@ -19,7 +19,9 @@ func (e *ADEntry) String() string {
 
 func (e *ADEntry) LDAPFormat() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("dn: %s\n", e.DN))
+	if e.DN != "" {
+		sb.WriteString(fmt.Sprintf("dn: %s\n", e.DN))
+	}
 	for _, attribute := range e.Attributes {
 		for _, value := range attribute.ByteValues {
 			//valueString := HandleLDAPBytes(attribute.Name, value)

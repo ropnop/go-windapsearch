@@ -28,6 +28,14 @@ type LDAPSession struct {
 	resultsChan chan *ldap.Entry
 }
 
+type DomainInfo struct {
+	Metadata *ldap.SearchResult
+	DomainFunctionalityLevel string
+	ForestFunctionalityLevel string
+	DomainControllerFunctionalityLevel string
+	ServerDNSName string
+}
+
 func NewLDAPSession(options *LDAPSessionOptions) (sess *LDAPSession, err error) {
 	port := options.Port
 	dc := options.DomainController
@@ -68,10 +76,12 @@ func NewLDAPSession(options *LDAPSessionOptions) (sess *LDAPSession, err error) 
 	if err != nil {
 		return
 	}
-	err = sess.getMetaData()
+	//err = sess.getMetaData()
+	_, err = sess.GetDefaultNamingContext()
 	if err != nil {
 		return
 	}
+
 	return sess, nil
 }
 
@@ -93,6 +103,34 @@ func (w *LDAPSession) Bind(username, password string) (err error) {
 
 func (w *LDAPSession) Close() {
 	w.LConn.Close()
+}
+
+func (w *LDAPSession) GetDefaultNamingContext() (string, error) {
+	if w.BaseDN != "" {
+		return w.BaseDN, nil
+	}
+	sr := ldap.NewSearchRequest(
+		"",
+		ldap.ScopeBaseObject,
+		ldap.NeverDerefAliases,
+		0, 0, false,
+		"(objectClass=*)",
+		[]string{"defaultNamingContext"},
+		nil)
+	res, err := w.LConn.Search(sr)
+	if err != nil {
+		return "", err
+	}
+	if len(res.Entries) == 0 {
+		return "", fmt.Errorf("error getting metadata: No LDAP responses from server")
+	}
+	defaultNamingContext := res.Entries[0].GetAttributeValue("defaultNamingContext")
+	if defaultNamingContext == "" {
+		return "", fmt.Errorf("error getting metadata: attribute defaultNamingContext missing")
+	}
+	w.BaseDN = defaultNamingContext
+	return w.BaseDN, nil
+
 }
 
 func (w *LDAPSession) getMetaData() (err error) {
@@ -123,6 +161,14 @@ func (w *LDAPSession) getMetaData() (err error) {
 	w.DomainInfo.DomainControllerFunctionalityLevel = adschema.FunctionalityLevelsMapping[domainControllerFunctionality]
 	w.DomainInfo.ServerDNSName = res.Entries[0].GetAttributeValue("dnsHostName")
 	w.BaseDN = defaultNamingContext
+	w.DomainInfo.Metadata = res
+	return nil
+}
+
+func (w *LDAPSession) ReturnMetadataResults() error {
+	for _, entry := range w.DomainInfo.Metadata.Entries {
+		w.resultsChan <- entry
+	}
 	return nil
 }
 

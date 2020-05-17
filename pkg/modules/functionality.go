@@ -41,8 +41,13 @@ func (FunctionalityModule) Run(session *ldapsession.LDAPSession, attrs []string)
 		ldap.NeverDerefAliases,
 		0, 0, false,
 		"(objectClass=*)",
-		attrs,
+		[]string{"*"},
 		nil)
-	return session.ExecuteSearchRequest(sr)
+	res, err := session.LConn.Search(sr)
+	if err != nil {
+		return err
+	}
+	session.ManualWriteSearchResultsToChan(res)
+	return nil
 }
 
