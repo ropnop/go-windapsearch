@@ -10,35 +10,17 @@ import (
 	"io"
 	"os"
 	"strings"
+	"text/tabwriter"
 )
 
 type WindapSearchSession struct {
 	Options      CommandLineOptions
 	LDAPSession  *ldapsession.LDAPSession
-	Module modules.Module
+	Module       modules.Module
 	AllModules   []modules.Module
 	OutputWriter io.Writer
-	Threads int
-	doneChan chan bool
-}
-
-
-var RootFlagSet *pflag.FlagSet
-
-func init() {
-	RootFlagSet = pflag.NewFlagSet("windapsearch", pflag.ExitOnError)
-	RootFlagSet.SortFlags = false
-	RootFlagSet.StringP("domain", "d", "", "The FQDN of the domain (e.g. 'lab.example.com'). Only needed if dc not provided")
-	RootFlagSet.String("dc", "", "The Domain Controller to query against")
-	RootFlagSet.StringP( "username", "u", "", "The full username with domain to bind with (e.g. 'ropnop@lab.example.com' or 'LAB\\ropnop')\n If not specified, will attempt anonymous bind")
-	RootFlagSet.StringP( "password", "p", "", "Password to use. If not specified, will be prompted for")
-	RootFlagSet.Int( "port", 0, "Port to connect to (if non standard)")
-	RootFlagSet.Bool( "secure", false, "Use LDAPS. This will not verify TLS certs, however. (default: false)" )
-	RootFlagSet.StringSlice( "attrs", nil, "Comma separated custom atrribute names to display (e.g. 'badPwdCount,lastLogon')")
-	RootFlagSet.Bool( "full", false, "Output all attributes from LDAP")
-	RootFlagSet.StringP( "output", "o", "", "Save results to file")
-	RootFlagSet.BoolP( "json", "j", false, "Convert LDAP output to JSON" )
-	RootFlagSet.BoolP( "interactive", "i", false, "Start in interactive mode")
+	Workers      int
+	doneChan     chan bool
 }
 
 type CommandLineOptions struct {
@@ -75,7 +57,7 @@ func NewSession() *WindapSearchSession {
 	wFlags.BoolVar(&w.Options.FullAttributes, "full", false, "Output all attributes from LDAP")
 	wFlags.StringVarP(&w.Options.Output, "output", "o", "", "Save results to file")
 	wFlags.BoolVarP(&w.Options.JSON, "json", "j", false, "Convert LDAP output to JSON" )
-	wFlags.BoolVarP(&w.Options.Interactive, "interactive", "i", false, "Start in interactive mode")
+	//wFlags.BoolVarP(&w.Options.Interactive, "interactive", "i", false, "Start in interactive mode") //TODO
 	wFlags.BoolVarP(&w.Options.Help, "help", "h", false, "Show this help")
 
 	pflag.ErrHelp = errors.New("")
@@ -85,13 +67,12 @@ func NewSession() *WindapSearchSession {
 		w.RegisterModule(m)
 	}
 
-	//wFlags.StringP("module", "m", "", fmt.Sprintf("Module to use. Available modules: \n[ %s ]", w.ModuleListString()))
 	wFlags.StringVarP(&w.Options.Module, "module", "m", "", "Module to use")
 
 	w.Options.FlagSet = wFlags
 
 	w.OutputWriter = os.Stdout //default to stdout
-	w.Threads = 10 //default to 10
+	w.Workers = 10             //default to 10
 	w.doneChan = make(chan bool)
 	return &w
 }
@@ -120,11 +101,14 @@ func (w *WindapSearchSession) ModuleListString() string {
 }
 
 func (w *WindapSearchSession) ModuleDescriptionString() string {
-	var sb strings.Builder
+	sb := &strings.Builder{}
+	tw := tabwriter.NewWriter(sb, 0, 0, 4, ' ', 0)
 	for _, mod := range w.AllModules {
-		sb.WriteString(fmt.Sprintf("\t%s\t\t%s\n", mod.Name(), mod.Description()))
+		fmt.Fprintf(tw, "\t%s\t%s\n", mod.Name(), mod.Description())
 	}
+	tw.Flush()
 	return sb.String()
+
 }
 
 func (w *WindapSearchSession) GetModuleByName(name string) modules.Module {

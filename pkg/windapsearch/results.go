@@ -72,7 +72,7 @@ func (w *WindapSearchSession) runModule() error {
 	}
 	outputChan := make(chan []byte)
 	go w.outputWorker(outputChan)
-	for i := 0; i <= w.Threads; i ++ {
+	for i := 0; i <= w.Workers; i ++ {
 		wg.Add(1)
 		go worker(resultsChan, outputChan, &wg)
 	}

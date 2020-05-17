@@ -31,7 +31,7 @@ func (p PrivilegedObjectsModule) Name() string {
 }
 
 func (p PrivilegedObjectsModule) Description() string {
-	return "Recursively list members of all highly privileged groups (i.e. Domain Admins, Enterprise Admins, Schema Admins, etc...)"
+	return "Recursively list members of all highly privileged groups"
 }
 
 func (p PrivilegedObjectsModule) FlagSet() *pflag.FlagSet {
