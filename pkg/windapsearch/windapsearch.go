@@ -3,6 +3,7 @@ package windapsearch
 import (
 	"errors"
 	"fmt"
+	"github.com/ropnop/go-windapsearch/pkg/buildinfo"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/ropnop/go-windapsearch/pkg/modules"
 	"github.com/ropnop/go-windapsearch/pkg/utils"
@@ -39,6 +40,7 @@ type CommandLineOptions struct {
 	JSON bool
 	Module string
 	Interactive bool
+	Version bool
 	ModuleFlags *pflag.FlagSet
 }
 
@@ -58,6 +60,7 @@ func NewSession() *WindapSearchSession {
 	wFlags.StringVarP(&w.Options.Output, "output", "o", "", "Save results to file")
 	wFlags.BoolVarP(&w.Options.JSON, "json", "j", false, "Convert LDAP output to JSON" )
 	//wFlags.BoolVarP(&w.Options.Interactive, "interactive", "i", false, "Start in interactive mode") //TODO
+	wFlags.BoolVar(&w.Options.Version, "version", false, "Show version info and exit")
 	wFlags.BoolVarP(&w.Options.Help, "help", "h", false, "Show this help")
 
 	pflag.ErrHelp = errors.New("")
@@ -121,7 +124,7 @@ func (w *WindapSearchSession) GetModuleByName(name string) modules.Module {
 }
 
 func (w *WindapSearchSession) ShowUsage() {
-	fmt.Fprintf(os.Stderr, "windapsearch: a tool to perform Windows domain enumeration through LDAP queries\n\nUsage: %s [options] -m [module]\n\nOptions:\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, "windapsearch: a tool to perform Windows domain enumeration through LDAP queries\n%s\nUsage: %s [options] -m [module]\n\nOptions:\n", buildinfo.FormatVersionString(), os.Args[0])
 	w.Options.FlagSet.PrintDefaults()
 	if w.Module == nil {
 		fmt.Fprintf(os.Stderr, "\nAvailable modules:\n%s", w.ModuleDescriptionString())
@@ -144,6 +147,11 @@ func (w *WindapSearchSession) Run() (err error) {
 
 	if w.Options.Help {
 		w.ShowUsage()
+		return
+	}
+
+	if w.Options.Version {
+		fmt.Println(buildinfo.FormatVersionString())
 		return
 	}
 
