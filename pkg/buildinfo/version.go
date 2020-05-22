@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	Version  = "dev"
-	GitSHA   =   "N/A"
-	BuildDate  = "N/A"
+	Version     = "dev"
+	GitSHA      = "N/A"
+	BuildDate   = "N/A"
 	BuildNumber = ""
-	GoVersion string
+	GoVersion   string
 )
 
 func FormatVersionString() string {

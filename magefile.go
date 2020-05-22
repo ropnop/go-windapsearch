@@ -2,17 +2,16 @@
 
 // magefile inspired/copied from Hugo's: https://github.com/gohugoio/hugo/blob/master/magefile.go
 
-
 package main
 
 import (
 	"fmt"
+	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
 	"os"
 	"os/exec"
 	"path"
 	"time"
-	"github.com/magefile/mage/mg"
-	"github.com/magefile/mage/sh"
 )
 
 const (
