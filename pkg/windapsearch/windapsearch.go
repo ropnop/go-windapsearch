@@ -1,6 +1,7 @@
 package windapsearch
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/ropnop/go-windapsearch/pkg/buildinfo"
@@ -10,6 +11,7 @@ import (
 	"github.com/spf13/pflag"
 	"io"
 	"os"
+	"os/signal"
 	"strings"
 	"text/tabwriter"
 )
@@ -20,30 +22,32 @@ type WindapSearchSession struct {
 	Module       modules.Module
 	AllModules   []modules.Module
 	OutputWriter io.Writer
-	Workers      int
 	doneChan     chan bool
+	ctx          context.Context
+	cancel       context.CancelFunc
 }
 
 type CommandLineOptions struct {
-	FlagSet *pflag.FlagSet
-	Help	bool
+	FlagSet          *pflag.FlagSet
+	Help             bool
 	Domain           string
 	DomainController string
-	Username string
-	Password string
-	Port int
-	Secure bool
-	ResolveHosts   bool
-	Attributes     []string
-	FullAttributes bool
-	Output      string
-	JSON bool
-	Module string
-	Interactive bool
-	Version bool
-	ModuleFlags *pflag.FlagSet
+	Username         string
+	Password         string
+	Port             int
+	Secure           bool
+	ResolveHosts     bool
+	Attributes       []string
+	FullAttributes   bool
+	Output           string
+	JSON             bool
+	Module           string
+	Interactive      bool
+	Version          bool
+	Workers int
+	PageSize int
+	ModuleFlags      *pflag.FlagSet
 }
-
 
 func NewSession() *WindapSearchSession {
 	var w WindapSearchSession
@@ -55,10 +59,12 @@ func NewSession() *WindapSearchSession {
 	wFlags.StringVarP(&w.Options.Username, "username", "u", "", "The full username with domain to bind with (e.g. 'ropnop@lab.example.com' or 'LAB\\ropnop')\n If not specified, will attempt anonymous bind")
 	wFlags.StringVarP(&w.Options.Password, "password", "p", "", "Password to use. If not specified, will be prompted for")
 	wFlags.IntVar(&w.Options.Port, "port", 0, "Port to connect to (if non standard)")
-	wFlags.BoolVar(&w.Options.Secure, "secure", false, "Use LDAPS. This will not verify TLS certs, however. (default: false)" )
+	wFlags.BoolVar(&w.Options.Secure, "secure", false, "Use LDAPS. This will not verify TLS certs, however. (default: false)")
 	wFlags.BoolVar(&w.Options.FullAttributes, "full", false, "Output all attributes from LDAP")
 	wFlags.StringVarP(&w.Options.Output, "output", "o", "", "Save results to file")
-	wFlags.BoolVarP(&w.Options.JSON, "json", "j", false, "Convert LDAP output to JSON" )
+	wFlags.BoolVarP(&w.Options.JSON, "json", "j", false, "Convert LDAP output to JSON")
+	wFlags.IntVar(&w.Options.Workers, "workers", 10, "concurrent workers to use")
+	wFlags.IntVar(&w.Options.PageSize, "page-size", 1000, "LDAP page size to use")
 	//wFlags.BoolVarP(&w.Options.Interactive, "interactive", "i", false, "Start in interactive mode") //TODO
 	wFlags.BoolVar(&w.Options.Version, "version", false, "Show version info and exit")
 	wFlags.BoolVarP(&w.Options.Help, "help", "h", false, "Show this help")
@@ -75,8 +81,18 @@ func NewSession() *WindapSearchSession {
 	w.Options.FlagSet = wFlags
 
 	w.OutputWriter = os.Stdout //default to stdout
-	w.Workers = 10             //default to 10
-	w.doneChan = make(chan bool)
+
+	// set up cancelling, catch SIGINT
+	w.ctx, w.cancel = context.WithCancel(context.Background())
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		select {
+		case <-c:
+			w.cancel()
+		}
+	}()
+
 	return &w
 }
 
@@ -144,7 +160,6 @@ func (w *WindapSearchSession) Run() (err error) {
 
 	w.LoadModule()
 
-
 	if w.Options.Help {
 		w.ShowUsage()
 		return
@@ -157,7 +172,10 @@ func (w *WindapSearchSession) Run() (err error) {
 
 	if w.Options.Output != "" {
 		fp, err2 := os.Create(w.Options.Output)
-		if err2 != nil { err = err2; return }
+		if err2 != nil {
+			err = err2
+			return
+		}
 		w.OutputWriter = fp
 		defer fp.Close()
 	}
@@ -171,7 +189,9 @@ func (w *WindapSearchSession) Run() (err error) {
 	password := w.Options.Password
 	if w.Options.Username != "" && password == "" {
 		password, err = utils.SecurePrompt(fmt.Sprintf("Password for [%s]", w.Options.Username))
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 	}
 
 	ldapOptions := ldapsession.LDAPSessionOptions{
@@ -181,10 +201,13 @@ func (w *WindapSearchSession) Run() (err error) {
 		Password:         password,
 		Port:             w.Options.Port,
 		Secure:           w.Options.Secure,
+		PageSize: w.Options.PageSize,
 	}
 
-	w.LDAPSession, err = ldapsession.NewLDAPSession(&ldapOptions)
-	if err != nil { return }
+	w.LDAPSession, err = ldapsession.NewLDAPSession(&ldapOptions, w.ctx)
+	if err != nil {
+		return
+	}
 	defer w.LDAPSession.Close()
 
 	if w.Options.Interactive {
@@ -194,8 +217,6 @@ func (w *WindapSearchSession) Run() (err error) {
 	}
 }
 
-
-
 func (w *WindapSearchSession) StartCLI() error {
 	if w.Module == nil {
 		fmt.Printf("[!] You must specify a valid module to use\n")
@@ -203,10 +224,8 @@ func (w *WindapSearchSession) StartCLI() error {
 		return nil
 	}
 
-
 	w.Options.ModuleFlags.AddFlagSet(w.Options.FlagSet)
 	w.Options.ModuleFlags.Parse(os.Args[:])
-
 
 	err := w.runModule()
 	if err != nil {
@@ -221,8 +240,3 @@ func (w *WindapSearchSession) StartCLI() error {
 func (w *WindapSearchSession) StartTUI() error {
 	return nil
 }
-
-
-
-
-

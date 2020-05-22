@@ -1,6 +1,7 @@
 package ldapsession
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"github.com/ropnop/go-windapsearch/pkg/adschema"
@@ -8,35 +9,42 @@ import (
 	"gopkg.in/ldap.v3"
 )
 
-
-
 type LDAPSessionOptions struct {
-	Domain string
+	Domain           string
 	DomainController string
-	Username string
-	Password string
-	Port int
-	Secure bool
+	Username         string
+	Password         string
+	Port             int
+	Secure           bool
+	PageSize         int
 }
 
 type LDAPSession struct {
-	LConn      *ldap.Conn
-	PageSize uint32
-	BaseDN     string
-	attrs      []string
-	DomainInfo DomainInfo
+	LConn       *ldap.Conn
+	PageSize    uint32
+	BaseDN      string
+	attrs       []string
+	DomainInfo  DomainInfo
 	resultsChan chan *ldap.Entry
+	ctx         context.Context
+	Channels    *ResultChannels
+}
+
+type ResultChannels struct {
+	Entries   chan *ldap.Entry
+	Referrals chan string
+	Controls  chan ldap.Control
 }
 
 type DomainInfo struct {
-	Metadata *ldap.SearchResult
-	DomainFunctionalityLevel string
-	ForestFunctionalityLevel string
+	Metadata                           *ldap.SearchResult
+	DomainFunctionalityLevel           string
+	ForestFunctionalityLevel           string
 	DomainControllerFunctionalityLevel string
-	ServerDNSName string
+	ServerDNSName                      string
 }
 
-func NewLDAPSession(options *LDAPSessionOptions) (sess *LDAPSession, err error) {
+func NewLDAPSession(options *LDAPSessionOptions, ctx context.Context) (sess *LDAPSession, err error) {
 	port := options.Port
 	dc := options.DomainController
 	if port == 0 {
@@ -63,7 +71,7 @@ func NewLDAPSession(options *LDAPSessionOptions) (sess *LDAPSession, err error) 
 
 	lConn, err := ldap.DialURL(url)
 	if err != nil {
-		return 
+		return
 	}
 	if options.Secure {
 		lConn.StartTLS(&tls.Config{InsecureSkipVerify: true})
@@ -71,23 +79,56 @@ func NewLDAPSession(options *LDAPSessionOptions) (sess *LDAPSession, err error) 
 	sess = &LDAPSession{
 		LConn: lConn,
 	}
-	sess.PageSize = 1000
+
+	sess.PageSize = uint32(options.PageSize)
+
 	err = sess.Bind(options.Username, options.Password)
 	if err != nil {
 		return
 	}
-	//err = sess.getMetaData()
 	_, err = sess.GetDefaultNamingContext()
 	if err != nil {
 		return
 	}
 
+	sess.NewChannels(ctx)
 	return sess, nil
 }
 
-func (w *LDAPSession) SetChannel(ch chan *ldap.Entry) {
-	w.resultsChan = ch
+func (w *LDAPSession) SetChannels(chs *ResultChannels, ctx context.Context) {
+	w.Channels = chs
+	w.ctx = ctx
 }
+
+func (w *LDAPSession) NewChannels(ctx context.Context) {
+	w.Channels = &ResultChannels{
+		Entries:   make(chan *ldap.Entry),
+		Referrals: make(chan string),
+		Controls:  make(chan ldap.Control),
+	}
+	w.ctx = ctx
+	return
+}
+
+func (w *LDAPSession) CloseChannels() {
+	if w.Channels.Entries != nil {
+		close(w.Channels.Entries)
+	}
+	if w.Channels.Controls != nil {
+		close(w.Channels.Controls)
+	}
+	if w.Channels.Referrals != nil {
+		close(w.Channels.Referrals)
+	}
+	//if w.ctx != nil {
+	//	w.ctx.Done()
+	//}
+}
+
+//func (w *LDAPSession) SetResultsChannel(ch chan *ldap.Entry, ctx context.Context) {
+//	w.resultsChan = ch
+//	w.ctx = ctx
+//}
 
 func (w *LDAPSession) Bind(username, password string) (err error) {
 	if username == "" {
@@ -171,4 +212,3 @@ func (w *LDAPSession) ReturnMetadataResults() error {
 	}
 	return nil
 }
-
