@@ -124,7 +124,7 @@ func flagEnv() map[string]string {
 		"VERSION":     version,
 		"BUILDNUM":    buildNum,
 		"DISTDIR":     distDir,
-		"CGO_ENABLED": "0",
+		"CGO_ENABLED": "1", //bug: when this is disabled, DNS gets wonky
 		"TARGETS":     targets,
 	}
 }

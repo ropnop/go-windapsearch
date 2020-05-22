@@ -1,14 +1,19 @@
 package buildinfo
 
-import "fmt"
+import (
+	"fmt"
+	"runtime"
+)
 
 var (
-	Version     string
-	GitSHA      string
-	BuildDate   string
-	BuildNumber string
+	Version  = "dev"
+	GitSHA   =   "N/A"
+	BuildDate  = "N/A"
+	BuildNumber = ""
+	GoVersion string
 )
 
 func FormatVersionString() string {
-	return fmt.Sprintf("Version: %s | GitSHA: %s | BuildDate: %s\n", Version, GitSHA, BuildDate)
+	GoVersion = runtime.Version()
+	return fmt.Sprintf("Version: %s | Commit: %s | Built on: %s | Built with: %s\n", Version, GitSHA, BuildDate, GoVersion)
 }
