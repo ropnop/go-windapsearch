@@ -36,4 +36,3 @@ func (g *GPOsModule) Run(session *ldapsession.LDAPSession, attrs []string) error
 	sr := session.MakeSimpleSearchRequest(g.Filter(), attrs)
 	return session.ExecuteSearchRequest(sr)
 }
-

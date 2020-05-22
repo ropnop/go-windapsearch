@@ -8,16 +8,16 @@ import (
 )
 
 var DomainAdminGroups = []string{
-"Domain Admins",
-"Domain-Admins",
-"Domain Administrators",
-"Domain-Administrators",
-"Domänen Admins",
-"Domänen-Admins",
-"Domain Admins",
-"Domain-Admins",
-"Domänen Administratoren",
-"Domänen-Administratoren",
+	"Domain Admins",
+	"Domain-Admins",
+	"Domain Administrators",
+	"Domain-Administrators",
+	"Domänen Admins",
+	"Domänen-Admins",
+	"Domain Admins",
+	"Domain-Admins",
+	"Domänen Administratoren",
+	"Domänen-Administratoren",
 }
 
 type DAModule struct{}
@@ -38,7 +38,7 @@ func (DAModule) Filter(baseDN string) string {
 	var sb strings.Builder
 	sb.WriteString("(&(objectClass=user)(|")
 	for _, group := range DomainAdminGroups {
-		filter := fmt.Sprintf("(memberof:1.2.840.113556.1.4.1941:=CN=%s,CN=Users,%s)",group,baseDN)
+		filter := fmt.Sprintf("(memberof:1.2.840.113556.1.4.1941:=CN=%s,CN=Users,%s)", group, baseDN)
 		sb.WriteString(filter)
 	}
 	sb.WriteString("))")
@@ -59,4 +59,3 @@ func (d DAModule) Run(session *ldapsession.LDAPSession, attrs []string) error {
 	searchReq := session.MakeSimpleSearchRequest(filter, attrs)
 	return session.ExecuteSearchRequest(searchReq)
 }
-

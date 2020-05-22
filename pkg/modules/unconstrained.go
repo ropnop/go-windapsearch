@@ -7,7 +7,7 @@ import (
 )
 
 type UnconstrainedModule struct {
-	Users bool
+	Users     bool
 	Computers bool
 }
 

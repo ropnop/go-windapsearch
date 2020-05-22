@@ -50,4 +50,3 @@ func (FunctionalityModule) Run(session *ldapsession.LDAPSession, attrs []string)
 	session.ManualWriteSearchResultsToChan(res)
 	return nil
 }
-

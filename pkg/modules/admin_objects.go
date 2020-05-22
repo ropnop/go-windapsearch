@@ -27,9 +27,8 @@ func (AdminObjects) DefaultAttrs() []string {
 	return []string{"distinguishedName"}
 }
 
-func (AdminObjects) Run(session *ldapsession.LDAPSession, attrs []string) (error) {
+func (AdminObjects) Run(session *ldapsession.LDAPSession, attrs []string) error {
 	filter := "(adminCount=1)"
 	sr := session.MakeSimpleSearchRequest(filter, attrs)
 	return session.ExecuteSearchRequest(sr)
 }
-

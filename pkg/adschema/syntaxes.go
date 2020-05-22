@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-
 // Unique syntaxes
 //"Boolean",
 //"Enumeration",
@@ -36,9 +35,9 @@ var SyntaxFunctions = map[string]ConvertBytes{
 	"Boolean":                  ConvertBool,
 	"String(Generalized-Time)": ConvertGeneralizedTime,
 	"Interval":                 ConvertInterval,
-	"String(Sid)": ConvertSid,
-	"Object(Replica-Link)": ConvertObjectReplicaLink,
-	"Enumeration": ConvertEnumeration,
+	"String(Sid)":              ConvertSid,
+	"Object(Replica-Link)":     ConvertObjectReplicaLink,
+	"Enumeration":              ConvertEnumeration,
 }
 
 func DefaultPrint(name string, b []byte) (interface{}, error) {

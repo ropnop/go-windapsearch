@@ -8,9 +8,9 @@ import (
 )
 
 var PrivilegedGroups = append([]string{
-	"Administrators",  // Builtin administrators group for the domain
+	"Administrators", // Builtin administrators group for the domain
 	"Enterprise Admins",
-	"Schema Admins",  // Highly privileged builtin group
+	"Schema Admins", // Highly privileged builtin group
 	"Account Operators",
 	"Backup Operators",
 	"Server Management",
@@ -45,8 +45,8 @@ func (p PrivilegedObjectsModule) DefaultAttrs() []string {
 func (PrivilegedObjectsModule) Filter(baseDN string) string {
 	var sb strings.Builder
 	sb.WriteString("(&(objectClass=user)(|")
-	for _, group := range PrivilegedGroups{
-		filter := fmt.Sprintf("(memberof:1.2.840.113556.1.4.1941:=CN=%s,CN=Users,%s)",group,baseDN)
+	for _, group := range PrivilegedGroups {
+		filter := fmt.Sprintf("(memberof:1.2.840.113556.1.4.1941:=CN=%s,CN=Users,%s)", group, baseDN)
 		sb.WriteString(filter)
 	}
 	sb.WriteString("))")
@@ -59,4 +59,3 @@ func (p PrivilegedObjectsModule) Run(session *ldapsession.LDAPSession, attrs []s
 	searchReq := session.MakeSimpleSearchRequest(filter, attrs)
 	return session.ExecuteSearchRequest(searchReq)
 }
-

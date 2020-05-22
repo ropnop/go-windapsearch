@@ -19,7 +19,6 @@ func SecurePrompt(message string) (response string, err error) {
 	return string(securebytes), nil
 }
 
-
 func ChooseDN(results *ldap.SearchResult) (dn string, err error) {
 	var options []string
 	for _, result := range results.Entries {

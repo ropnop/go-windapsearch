@@ -26,12 +26,12 @@ const (
 )
 
 var GroupTypeMap = map[int]string{
-	SystemGroup: "Created by system",
-	GlobalScope: "Global Scope",
-	DomainScope: "Domain Local Scope",
+	SystemGroup:    "Created by system",
+	GlobalScope:    "Global Scope",
+	DomainScope:    "Domain Local Scope",
 	UniversalScope: "Universal Scope",
-	APPBasic: "APP_BASIC group for Windows Server Authorization Manager",
-	APPQuery: "APP_QUERY group for Windows Server Authorization Manager",
+	APPBasic:       "APP_BASIC group for Windows Server Authorization Manager",
+	APPQuery:       "APP_QUERY group for Windows Server Authorization Manager",
 }
 
 func ConvertGroupType(groupType int64) interface{} {
@@ -48,4 +48,3 @@ func ConvertGroupType(groupType int64) interface{} {
 	}
 	return flags
 }
-

@@ -4,17 +4,18 @@ import (
 	uac "github.com/audibleblink/msldapuac"
 )
 
-type ConvertEnum func(int64) (interface{})
+type ConvertEnum func(int64) interface{}
 
-var EnumFuncs = map[string]ConvertEnum {
-	"sAMAccountType": func(i int64) (interface{}) {
+var EnumFuncs = map[string]ConvertEnum{
+	"sAMAccountType": func(i int64) interface{} {
 		val, ok := SamAccountTypeEnum[i]
-		if !ok { return i }
+		if !ok {
+			return i
+		}
 		return val
 	},
 	"userAccountControl": ConvertUAC,
-	"groupType": ConvertGroupType,
-
+	"groupType":          ConvertGroupType,
 }
 
 // SAM-Account-Type
@@ -33,7 +34,6 @@ var SamAccountTypeEnum = map[int64]string{
 	0x7fffffff: "SAM_ACCOUNT_TYPE_MAX",
 }
 
-
 func ConvertUAC(i int64) interface{} {
 	flags, err := uac.ParseUAC(i)
 	if err != nil {
@@ -41,9 +41,3 @@ func ConvertUAC(i int64) interface{} {
 	}
 	return flags
 }
-
-
-
-
-
-

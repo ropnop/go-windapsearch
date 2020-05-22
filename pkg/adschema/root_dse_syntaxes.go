@@ -8,14 +8,14 @@ import (
 // https://docs.microsoft.com/en-us/windows/win32/adschema/rootdse
 
 // I'm only implementing ones I care about at this point
-var RootDSEAttributeMap = map[string]bool {
-	"defaultNamingContext": true,
-	"dnsHostName": true,
-	"domainFunctionality": true,
-	"forestFunctionality": true,
+var RootDSEAttributeMap = map[string]bool{
+	"defaultNamingContext":          true,
+	"dnsHostName":                   true,
+	"domainFunctionality":           true,
+	"forestFunctionality":           true,
 	"domainControllerFunctionality": true,
-	"rootDomainNamingContext": true,
-	"currentTime": true,
+	"rootDomainNamingContext":       true,
+	"currentTime":                   true,
 }
 
 func marshalRootDSEAttribute(e *ADAttribute) ([]byte, error) {
@@ -38,4 +38,3 @@ func marshalRootDSEAttribute(e *ADAttribute) ([]byte, error) {
 	}
 	return marshalUnknownAttribute(e)
 }
-

@@ -28,10 +28,8 @@ func (c ComputersModule) DefaultAttrs() []string {
 	return []string{"cn", "dNSHostName", "operatingSystem", "operatingSystemVersion", "operatingSystemServicePack"}
 }
 
-
 func (c ComputersModule) Run(session *ldapsession.LDAPSession, attrs []string) error {
 	filter := "(objectClass=Computer)"
 	searchReq := session.MakeSimpleSearchRequest(filter, attrs)
 	return session.ExecuteSearchRequest(searchReq)
 }
-

@@ -8,10 +8,10 @@ import (
 	"os"
 )
 
-type MembersModule struct{
+type MembersModule struct {
 	Recursive bool
-	Search string
-	DN string
+	Search    string
+	DN        string
 	OnlyUsers bool
 }
 
@@ -31,7 +31,7 @@ func (m *MembersModule) FlagSet() *pflag.FlagSet {
 	flags := pflag.NewFlagSet("members-module", pflag.ExitOnError)
 	flags.BoolVarP(&m.Recursive, "recursive", "r", false, "Perform recursive lookup")
 	flags.StringVarP(&m.Search, "search", "s", "", "Search for group name")
-	flags.StringVarP(&m.DN, "group", "g", "","Full DN of group to enumerate")
+	flags.StringVarP(&m.DN, "group", "g", "", "Full DN of group to enumerate")
 	flags.BoolVar(&m.OnlyUsers, "users", false, "Only return user objects")
 	return flags
 }
@@ -64,7 +64,6 @@ func (m MembersModule) Filter() string {
 	return filter
 }
 
-
 func (m *MembersModule) Run(session *ldapsession.LDAPSession, attrs []string) error {
 	if m.DN == "" && m.Search == "" {
 		return fmt.Errorf("must provide a group or a search term")
@@ -80,6 +79,4 @@ func (m *MembersModule) Run(session *ldapsession.LDAPSession, attrs []string) er
 	sr := session.MakeSimpleSearchRequest(m.Filter(), attrs)
 	return session.ExecuteSearchRequest(sr)
 
-
 }
-

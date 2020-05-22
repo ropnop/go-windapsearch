@@ -26,7 +26,7 @@ func (c *CustomSearch) Filter() string {
 	return c.CustomFilter
 }
 
-func (c *CustomSearch) FlagSet()  *pflag.FlagSet {
+func (c *CustomSearch) FlagSet() *pflag.FlagSet {
 	flags := pflag.NewFlagSet("custom", pflag.ExitOnError)
 	flags.StringVar(&c.CustomFilter, "filter", "", "LDAP syntax filter")
 	return flags
@@ -43,6 +43,3 @@ func (c *CustomSearch) Run(lSession *ldapsession.LDAPSession, attrs []string) er
 	searchReq := lSession.MakeSimpleSearchRequest(c.Filter(), attrs)
 	return lSession.ExecuteSearchRequest(searchReq)
 }
-
-
-

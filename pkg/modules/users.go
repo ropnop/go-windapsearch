@@ -8,7 +8,7 @@ import (
 
 type UsersModule struct {
 	ExtraFilter string
-	SearchTerm string
+	SearchTerm  string
 }
 
 func init() {
@@ -36,7 +36,6 @@ func (u *UsersModule) Filter() string {
 
 }
 
-
 func (u *UsersModule) FlagSet() *pflag.FlagSet {
 	flags := pflag.NewFlagSet(u.Name(), pflag.ExitOnError)
 	flags.StringVar(&u.ExtraFilter, "filter", "", "Extra LDAP syntax filter to use")
@@ -53,8 +52,3 @@ func (u *UsersModule) Run(lSession *ldapsession.LDAPSession, attrs []string) err
 	return lSession.ExecuteSearchRequest(searchReq)
 
 }
-
-
-
-
-

@@ -36,4 +36,3 @@ func (u UserSPNsModule) Run(session *ldapsession.LDAPSession, attrs []string) er
 	sr := session.MakeSimpleSearchRequest(u.Filter(), attrs)
 	return session.ExecuteSearchRequest(sr)
 }
-

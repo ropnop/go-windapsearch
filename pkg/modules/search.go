@@ -40,7 +40,6 @@ func (s *SearchModule) SearchFilter() string {
 	return fmt.Sprintf("(%s)", utils.CreateANRSearch(s.SearchTerm))
 }
 
-
 func (s *SearchModule) Run(session *ldapsession.LDAPSession, attrs []string) error {
 	if s.SearchTerm == "" {
 		return fmt.Errorf("must include a search term")
@@ -70,4 +69,3 @@ func (s *SearchModule) Run(session *ldapsession.LDAPSession, attrs []string) err
 	return session.ExecuteSearchRequest(sr)
 
 }
-
