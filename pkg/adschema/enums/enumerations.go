@@ -15,7 +15,6 @@ var EnumFuncs = map[string]ConvertEnum{
 		return val
 	},
 	"userAccountControl": ConvertUAC,
-	"groupType":          ConvertGroupType,
 }
 
 // SAM-Account-Type
