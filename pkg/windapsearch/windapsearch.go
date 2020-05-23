@@ -8,6 +8,7 @@ import (
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/ropnop/go-windapsearch/pkg/modules"
 	"github.com/ropnop/go-windapsearch/pkg/utils"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"io"
 	"os"
@@ -21,8 +22,10 @@ type WindapSearchSession struct {
 	LDAPSession  *ldapsession.LDAPSession
 	Module       modules.Module
 	AllModules   []modules.Module
+	Log          *logrus.Entry
 	OutputWriter io.Writer
 	doneChan     chan bool
+	workers      int
 	ctx          context.Context
 	cancel       context.CancelFunc
 }
@@ -44,8 +47,9 @@ type CommandLineOptions struct {
 	Module           string
 	Interactive      bool
 	Version          bool
-	Workers int
-	PageSize int
+	Verbose          bool
+	Debug            bool
+	PageSize         int
 	ModuleFlags      *pflag.FlagSet
 }
 
@@ -63,10 +67,11 @@ func NewSession() *WindapSearchSession {
 	wFlags.BoolVar(&w.Options.FullAttributes, "full", false, "Output all attributes from LDAP")
 	wFlags.StringVarP(&w.Options.Output, "output", "o", "", "Save results to file")
 	wFlags.BoolVarP(&w.Options.JSON, "json", "j", false, "Convert LDAP output to JSON")
-	wFlags.IntVar(&w.Options.Workers, "workers", 10, "concurrent workers to use")
 	wFlags.IntVar(&w.Options.PageSize, "page-size", 1000, "LDAP page size to use")
 	//wFlags.BoolVarP(&w.Options.Interactive, "interactive", "i", false, "Start in interactive mode") //TODO
 	wFlags.BoolVar(&w.Options.Version, "version", false, "Show version info and exit")
+	wFlags.BoolVarP(&w.Options.Verbose, "verbose", "v", false, "Show info logs")
+	wFlags.BoolVar(&w.Options.Debug, "debug", false, "Show debug logging")
 	wFlags.BoolVarP(&w.Options.Help, "help", "h", false, "Show this help")
 
 	pflag.ErrHelp = errors.New("")
@@ -81,7 +86,17 @@ func NewSession() *WindapSearchSession {
 	w.Options.FlagSet = wFlags
 
 	w.OutputWriter = os.Stdout //default to stdout
+	w.workers = 5              //concurrent workers for marshaling entries. 5 seems reasonable
 
+	logger := logrus.New()
+
+	logger.Out = os.Stderr // default log to stderr
+	logger.SetLevel(logrus.ErrorLevel)
+	logger.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp: true,
+		PadLevelText:  false,
+	})
+	w.Log = logger.WithFields(logrus.Fields{"package": "windapsearch"})
 	// set up cancelling, catch SIGINT
 	w.ctx, w.cancel = context.WithCancel(context.Background())
 	c := make(chan os.Signal, 1)
@@ -147,7 +162,6 @@ func (w *WindapSearchSession) ShowUsage() {
 	} else {
 		fmt.Fprintf(os.Stderr, "\nOptions for %q module:\n", w.Module.Name())
 		w.Options.ModuleFlags.PrintDefaults()
-		//fmt.Fprintf(os.Stderr, "\nDefault attrs for %q:\t[%s]\n", w.Module.Name(), strings.Join(w.Module.DefaultAttrs(), ","))
 	}
 }
 
@@ -170,6 +184,13 @@ func (w *WindapSearchSession) Run() (err error) {
 		return
 	}
 
+	if w.Options.Verbose {
+		w.Log.Logger.SetLevel(logrus.InfoLevel)
+	}
+	if w.Options.Debug {
+		w.Log.Logger.SetLevel(logrus.DebugLevel)
+	}
+
 	if w.Options.Output != "" {
 		fp, err2 := os.Create(w.Options.Output)
 		if err2 != nil {
@@ -178,6 +199,9 @@ func (w *WindapSearchSession) Run() (err error) {
 		}
 		w.OutputWriter = fp
 		defer fp.Close()
+		w.Log.Infof("Saving output to %q", fp.Name())
+	} else {
+		w.Log.Infof("Saving output to STDOUT")
 	}
 
 	if w.Options.Domain == "" && w.Options.DomainController == "" {
@@ -201,7 +225,8 @@ func (w *WindapSearchSession) Run() (err error) {
 		Password:         password,
 		Port:             w.Options.Port,
 		Secure:           w.Options.Secure,
-		PageSize: w.Options.PageSize,
+		PageSize:         w.Options.PageSize,
+		Logger:           w.Log.Logger,
 	}
 
 	w.LDAPSession, err = ldapsession.NewLDAPSession(&ldapOptions, w.ctx)

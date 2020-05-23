@@ -3,8 +3,8 @@ package ldapsession
 import (
 	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/ldap.v3"
-	"os"
 )
 
 func (w *LDAPSession) MakeSimpleSearchRequest(filter string, attrs []string) *ldap.SearchRequest {
@@ -20,6 +20,7 @@ func (w *LDAPSession) MakeSimpleSearchRequest(filter string, attrs []string) *ld
 
 // GetSearchResults is a synchronous operation that will populate and return an ldap.SearchResult object
 func (w *LDAPSession) GetSearchResults(request *ldap.SearchRequest) (result *ldap.SearchResult, err error) {
+	w.Log.Infof("making search request with filter: %q", request.Filter)
 	return w.LConn.SearchWithPaging(request, 1000)
 }
 
@@ -32,17 +33,17 @@ func (w *LDAPSession) ManualWriteSearchResultsToChan(results *ldap.SearchResult)
 
 // ExecuteSearchRequest performs a paged search and writes results to the LDAPsession's defined results channel.
 // it only returns an err
-func (w *LDAPSession) ExecuteSearchRequest(searchRequest *ldap.SearchRequest) (error) {
+func (w *LDAPSession) ExecuteSearchRequest(searchRequest *ldap.SearchRequest) error {
+	w.Log.WithFields(logrus.Fields{"filter": searchRequest.Filter, "attributes": searchRequest.Attributes}).Infof("sending LDAP search request")
+
 	if w.Channels == nil {
 		return fmt.Errorf("no channels defined. Call SetChannels first, or use GetSearchResults instead")
 	}
 
 	defer func() {
-		w.LConn.Debug.Printf("ldapsearch terminating\n")
+		w.Log.Debugf("search finished. closing channels...")
 		w.CloseChannels()
 	}()
-
-
 
 	// basically a re-implementation of the standard function: https://github.com/go-ldap/ldap/blob/master/v3/search.go#L253
 	// but writes entries to a channel as it gets them instead of waiting for all pages to complete
@@ -68,12 +69,12 @@ PagedSearch:
 	for {
 		select {
 		case <-w.ctx.Done():
-			fmt.Fprintf(os.Stderr, "cancel recieved, stopping ldap\n")
+			w.Log.Warn("cancel received. aborting remaining pages")
 			return nil
 		default:
-			w.LConn.Debug.Printf("making paged request...\n")
+			w.Log.Debugf("making paged request...\n")
 			result, err := w.LConn.Search(searchRequest)
-			w.LConn.Debug.Printf("Looking for Paging Control...\n")
+			w.Log.Debugf("Looking for Paging Control...\n")
 			pageNumber++
 			if err != nil {
 				return err
@@ -86,7 +87,7 @@ PagedSearch:
 				w.Channels.Entries <- entry
 			}
 
-			fmt.Fprintf(os.Stderr, "Received page %d with %d LDAP entries...\n", pageNumber, len(result.Entries))
+			w.Log.Infof("Received page %d with %d LDAP entries...", pageNumber, len(result.Entries))
 
 			for _, referral := range result.Referrals {
 				w.Channels.Referrals <- referral
@@ -96,18 +97,18 @@ PagedSearch:
 				w.Channels.Controls <- control
 			}
 
-			w.LConn.Debug.Printf("Looking for Paging Control...\n")
+			w.Log.Debugf("Looking for Paging Control...")
 			pagingResult := ldap.FindControl(result.Controls, ldap.ControlTypePaging)
 			if pagingResult == nil {
 				pagingControl = nil
-				w.LConn.Debug.Printf("Could not find paging control.  Breaking...\n")
+				w.Log.Debugf("Could not find paging control.  Breaking...")
 				break PagedSearch
 			}
 
 			cookie := pagingResult.(*ldap.ControlPaging).Cookie
 			if len(cookie) == 0 {
 				pagingControl = nil
-				w.LConn.Debug.Printf("Could not find cookie.  Breaking...\n")
+				w.Log.Debugf("Could not find cookie.  Breaking...")
 				break PagedSearch
 			}
 			pagingControl.SetCookie(cookie)
@@ -115,7 +116,7 @@ PagedSearch:
 	}
 
 	if pagingControl != nil {
-		w.LConn.Debug.Printf("Abandoning Paging...\n")
+		w.Log.Debugf("Abandoning Paging...")
 		pagingControl.PagingSize = 0
 		w.LConn.Search(searchRequest)
 	}

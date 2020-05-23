@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ropnop/go-windapsearch/pkg/adschema"
 	"github.com/ropnop/go-windapsearch/pkg/dns"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/ldap.v3"
 )
 
@@ -17,6 +18,7 @@ type LDAPSessionOptions struct {
 	Port             int
 	Secure           bool
 	PageSize         int
+	Logger           *logrus.Logger
 }
 
 type LDAPSession struct {
@@ -25,6 +27,7 @@ type LDAPSession struct {
 	BaseDN      string
 	attrs       []string
 	DomainInfo  DomainInfo
+	Log         *logrus.Entry
 	resultsChan chan *ldap.Entry
 	ctx         context.Context
 	Channels    *ResultChannels
@@ -45,6 +48,12 @@ type DomainInfo struct {
 }
 
 func NewLDAPSession(options *LDAPSessionOptions, ctx context.Context) (sess *LDAPSession, err error) {
+	logger := logrus.New()
+	if options.Logger != nil {
+		logger = options.Logger
+	}
+	sess = &LDAPSession{Log: logger.WithFields(logrus.Fields{"package": "ldapsession"})}
+
 	port := options.Port
 	dc := options.DomainController
 	if port == 0 {
@@ -60,6 +69,7 @@ func NewLDAPSession(options *LDAPSessionOptions, ctx context.Context) (sess *LDA
 			return sess, err
 		}
 		dc = dcs[0]
+		sess.Log.Infof("Found LDAP server via DNS: %s", dc)
 	}
 	var url string
 
@@ -76,20 +86,19 @@ func NewLDAPSession(options *LDAPSessionOptions, ctx context.Context) (sess *LDA
 	if options.Secure {
 		lConn.StartTLS(&tls.Config{InsecureSkipVerify: true})
 	}
-	sess = &LDAPSession{
-		LConn: lConn,
-	}
-
+	sess.LConn = lConn
 	sess.PageSize = uint32(options.PageSize)
 
 	err = sess.Bind(options.Username, options.Password)
 	if err != nil {
 		return
 	}
+	sess.Log.Infof("successful bind to %q as %q", url, options.Username)
 	_, err = sess.GetDefaultNamingContext()
 	if err != nil {
 		return
 	}
+	sess.Log.Infof("retrieved default naming context: %q", sess.BaseDN)
 
 	sess.NewChannels(ctx)
 	return sess, nil
@@ -101,6 +110,7 @@ func (w *LDAPSession) SetChannels(chs *ResultChannels, ctx context.Context) {
 }
 
 func (w *LDAPSession) NewChannels(ctx context.Context) {
+	w.Log.Debugf("creating new ldapsession channels")
 	w.Channels = &ResultChannels{
 		Entries:   make(chan *ldap.Entry),
 		Referrals: make(chan string),
@@ -120,9 +130,8 @@ func (w *LDAPSession) CloseChannels() {
 	if w.Channels.Referrals != nil {
 		close(w.Channels.Referrals)
 	}
-	//if w.ctx != nil {
-	//	w.ctx.Done()
-	//}
+	w.Log.Debugf("closing ldapsession channels")
+
 }
 
 //func (w *LDAPSession) SetResultsChannel(ch chan *ldap.Entry, ctx context.Context) {

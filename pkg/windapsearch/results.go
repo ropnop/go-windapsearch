@@ -2,21 +2,21 @@ package windapsearch
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/ropnop/go-windapsearch/pkg/adschema"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"io"
-	"os"
 	"sync"
 )
 
 func (w *WindapSearchSession) outputWorker(input chan []byte, done chan struct{}) {
+	w.Log.Debugf("outputWorker started")
 	defer func() {
 		if w.Options.JSON {
 			io.WriteString(w.OutputWriter, "]")
 		}
-		// notify we're done writing
+		// notify we're done writing by closing channel
 		close(done)
+		w.Log.Debugf("outputWorker closing, finished writing")
 	}()
 
 	entryDelimiter := "\n"
@@ -42,8 +42,9 @@ func (w *WindapSearchSession) outputWorker(input chan []byte, done chan struct{}
 }
 
 func (w *WindapSearchSession) searchResultWorker(chans *ldapsession.ResultChannels, out chan []byte, wg *sync.WaitGroup) {
+	w.Log.Debugf("searchResultsWorker started")
 	defer func() {
-		fmt.Fprintf(os.Stderr, "worker closing...\n")
+		w.Log.Debugf("searchResultsWorker closing")
 		wg.Done()
 	}()
 	for {
@@ -58,19 +59,17 @@ func (w *WindapSearchSession) searchResultWorker(chans *ldapsession.ResultChanne
 			} else {
 				b, err := json.Marshal(e)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "error marshaling %s\n", e.DN)
+					w.Log.WithField("DN", e.DN).Warn("error marshaling entry", e.DN)
 				}
 				out <- b
 			}
-		// these do nothing, but we need have something receiving these channels, or else the program wil
-		case <- chans.Referrals:
-		case <- chans.Controls:
+		// these do nothing, but we need have something receiving these channels, or else the program will freeze
+		case <-chans.Referrals:
+		case <-chans.Controls:
 			continue
 		}
 	}
 }
-
-
 
 func (w *WindapSearchSession) runModule() error {
 	var attrs []string
@@ -80,16 +79,16 @@ func (w *WindapSearchSession) runModule() error {
 		attrs = w.Options.Attributes
 	}
 
-
 	// Set up our write worker, used to write stuff to stdout or file
 	// doneChan is used to indicate the module is completely done and results are written
 	doneWriting := make(chan struct{})
 	outputChan := make(chan []byte)
+
 	go w.outputWorker(outputChan, doneWriting)
 
 	// set up our result workers, used to translate/marshal entries
 	var wg sync.WaitGroup
-	for i := 0; i < w.Options.Workers; i++ {
+	for i := 0; i < w.workers; i++ {
 		wg.Add(1)
 		go w.searchResultWorker(w.LDAPSession.Channels, outputChan, &wg)
 	}
@@ -101,10 +100,12 @@ func (w *WindapSearchSession) runModule() error {
 
 	// wait for the search to be done and workers to finish
 	wg.Wait()
-	fmt.Fprintf(os.Stderr, "waitgroup finished!\n")
+	w.Log.Debug("waitgroup finished, all entry workers done")
 
 	// when workers are done, nothing left to write
 	close(outputChan)
+	w.Log.Debug("output channel closed. waiting for writer to finish")
+
 	<-doneWriting
 
 	return nil

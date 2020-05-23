@@ -3,7 +3,6 @@ package enums
 import (
 	"fmt"
 	"github.com/audibleblink/bamflags"
-	"os"
 )
 
 // https://docs.microsoft.com/en-us/windows/win32/adschema/a-grouptype#remarks
@@ -35,7 +34,6 @@ var GroupTypeMap = map[int]string{
 }
 
 func ConvertGroupType(groupType int64) interface{} {
-	fmt.Fprintf(os.Stderr, "groupType: %d\n", groupType)
 	values, err := bamflags.ParseInt(groupType)
 	if err != nil {
 		return []string{fmt.Sprintf("%s", groupType)}
