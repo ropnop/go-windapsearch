@@ -18,17 +18,32 @@ func (w *LDAPSession) MakeSimpleSearchRequest(filter string, attrs []string) *ld
 		nil)
 }
 
-// GetSearchResults is a synchronous operation that will populate and return an ldap.SearchResult object
-func (w *LDAPSession) GetSearchResults(request *ldap.SearchRequest) (result *ldap.SearchResult, err error) {
-	w.Log.Infof("making search request with filter: %q", request.Filter)
+// GetPagedSearchResults is a synchronous operation that will populate and return an ldap.SearchResult object
+func (w *LDAPSession) GetPagedSearchResults(request *ldap.SearchRequest) (result *ldap.SearchResult, err error) {
+	w.Log.WithFields(logrus.Fields{"filter": request.Filter, "attributes": request.Attributes}).Infof("sending LDAP search request")
 	return w.LConn.SearchWithPaging(request, 1000)
 }
 
+func (w *LDAPSession) GetSearchResults(request *ldap.SearchRequest) (result *ldap.SearchResult, err error) {
+	w.Log.WithFields(logrus.Fields{"filter": request.Filter, "attributes": request.Attributes}).Infof("sending LDAP search request")
+	return w.LConn.Search(request)
+}
+
 func (w *LDAPSession) ManualWriteSearchResultsToChan(results *ldap.SearchResult) {
+	w.Log.Debugf("received search results, writing %d entries to channel", len(results.Entries))
+
+	defer w.CloseChannels()
+
 	for _, entry := range results.Entries {
-		w.resultsChan <- entry
+		w.Channels.Entries <- entry
 	}
-	close(w.resultsChan)
+	for _, referral := range results.Referrals {
+		w.Channels.Referrals <- referral
+	}
+	for _, control := range results.Controls {
+		w.Channels.Controls <- control
+	}
+
 }
 
 // ExecuteSearchRequest performs a paged search and writes results to the LDAPsession's defined results channel.
@@ -37,7 +52,7 @@ func (w *LDAPSession) ExecuteSearchRequest(searchRequest *ldap.SearchRequest) er
 	w.Log.WithFields(logrus.Fields{"filter": searchRequest.Filter, "attributes": searchRequest.Attributes}).Infof("sending LDAP search request")
 
 	if w.Channels == nil {
-		return fmt.Errorf("no channels defined. Call SetChannels first, or use GetSearchResults instead")
+		return fmt.Errorf("no channels defined. Call SetChannels first, or use GetPagedSearchResults instead")
 	}
 
 	defer func() {

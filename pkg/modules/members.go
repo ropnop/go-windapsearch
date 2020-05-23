@@ -44,7 +44,7 @@ func (m *MembersModule) ChooseGroup(session *ldapsession.LDAPSession) (dn string
 	filter := "(objectcategory=group)"
 	filter = utils.AddAndFilter(filter, utils.CreateANRSearch(m.Search))
 	sr := session.MakeSimpleSearchRequest(filter, []string{})
-	matchResults, err := session.GetSearchResults(sr)
+	matchResults, err := session.GetPagedSearchResults(sr)
 	if err != nil {
 		return
 	}

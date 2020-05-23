@@ -49,7 +49,7 @@ func (s *SearchModule) Run(session *ldapsession.LDAPSession, attrs []string) err
 		return session.ExecuteSearchRequest(sr)
 	}
 	searchRequest := session.MakeSimpleSearchRequest(s.SearchFilter(), []string{"distinguishedName"})
-	searchResults, err := session.GetSearchResults(searchRequest)
+	searchResults, err := session.GetPagedSearchResults(searchRequest)
 	if err != nil {
 		return err
 	}

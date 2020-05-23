@@ -13,15 +13,15 @@ func init() {
 }
 
 func (FunctionalityModule) Name() string {
-	return "functionality"
+	return "metadata"
 }
 
 func (FunctionalityModule) Description() string {
-	return "Print domain functionality level"
+	return "Print LDAP server metadata"
 }
 
 func (FunctionalityModule) FlagSet() *pflag.FlagSet {
-	return pflag.NewFlagSet("functionality", pflag.ExitOnError)
+	return pflag.NewFlagSet("metadata", pflag.ExitOnError)
 }
 
 func (FunctionalityModule) DefaultAttrs() []string {
@@ -41,9 +41,10 @@ func (FunctionalityModule) Run(session *ldapsession.LDAPSession, attrs []string)
 		ldap.NeverDerefAliases,
 		0, 0, false,
 		"(objectClass=*)",
-		[]string{"*"},
+		attrs,
 		nil)
-	res, err := session.LConn.Search(sr)
+	//res, err := session.LConn.Search(sr)
+	res, err := session.GetSearchResults(sr)
 	if err != nil {
 		return err
 	}
