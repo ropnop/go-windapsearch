@@ -2,7 +2,7 @@
 
 // This code consumes the JSON created from scraping the MS documentation and generates the map of Attribute names
 // to Syntax
-// to update the JSON, run scrapeAttributesFromMS.py
+// to update the JSON, run scrapeAttributesFromMS.py in the tools directory
 package main
 
 import (
@@ -39,7 +39,7 @@ func main() {
 	var d data
 	d.Timestamp = time.Now().Format(time.RFC3339)
 
-	file, err := ioutil.ReadFile("ADAttributes.json")
+	file, err := ioutil.ReadFile("../../tools/ADAttributes.json")
 	must(err)
 
 	err = json.Unmarshal([]byte(file), &d.ADAttributes)

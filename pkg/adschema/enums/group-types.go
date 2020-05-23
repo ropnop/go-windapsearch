@@ -36,7 +36,7 @@ var GroupTypeMap = map[int]string{
 func ConvertGroupType(groupType int64) interface{} {
 	values, err := bamflags.ParseInt(groupType)
 	if err != nil {
-		return []string{fmt.Sprintf("%s", groupType)}
+		return []string{fmt.Sprintf("%d", groupType)}
 	}
 	var flags []string
 	for _, value := range values {

@@ -29,15 +29,9 @@ func (w *WindapSearchSession) outputWorker(input chan []byte, done chan struct{}
 		return
 	}
 	w.OutputWriter.Write(firstEntry)
-	for {
-		select {
-		case b, ok := <-input:
-			if !ok {
-				return
-			}
-			io.WriteString(w.OutputWriter, entryDelimiter)
-			w.OutputWriter.Write(b)
-		}
+	for b := range input {
+		io.WriteString(w.OutputWriter, entryDelimiter)
+		w.OutputWriter.Write(b)
 	}
 }
 

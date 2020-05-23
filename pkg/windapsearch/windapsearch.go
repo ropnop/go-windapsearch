@@ -24,7 +24,6 @@ type WindapSearchSession struct {
 	AllModules   []modules.Module
 	Log          *logrus.Entry
 	OutputWriter io.Writer
-	doneChan     chan bool
 	workers      int
 	ctx          context.Context
 	cancel       context.CancelFunc
@@ -102,10 +101,8 @@ func NewSession() *WindapSearchSession {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
-		select {
-		case <-c:
-			w.cancel()
-		}
+		<-c
+		w.cancel()
 	}()
 
 	return &w

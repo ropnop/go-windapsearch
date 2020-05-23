@@ -38,7 +38,7 @@ func (c *CustomSearch) DefaultAttrs() []string {
 
 func (c *CustomSearch) Run(lSession *ldapsession.LDAPSession, attrs []string) error {
 	if c.Filter() == "" {
-		return fmt.Errorf("Must provide a filter to run!")
+		return fmt.Errorf("must provide a filter to run")
 	}
 	searchReq := lSession.MakeSimpleSearchRequest(c.Filter(), attrs)
 	return lSession.ExecuteSearchRequest(searchReq)

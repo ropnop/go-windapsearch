@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/ropnop/go-windapsearch/pkg/adschema"
 	"github.com/ropnop/go-windapsearch/pkg/dns"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/ldap.v3"
@@ -25,7 +24,6 @@ type LDAPSession struct {
 	LConn       *ldap.Conn
 	PageSize    uint32
 	BaseDN      string
-	attrs       []string
 	DomainInfo  DomainInfo
 	Log         *logrus.Entry
 	resultsChan chan *ldap.Entry
@@ -117,7 +115,6 @@ func (w *LDAPSession) NewChannels(ctx context.Context) {
 		Controls:  make(chan ldap.Control),
 	}
 	w.ctx = ctx
-	return
 }
 
 func (w *LDAPSession) CloseChannels() {
@@ -181,38 +178,6 @@ func (w *LDAPSession) GetDefaultNamingContext() (string, error) {
 	w.BaseDN = defaultNamingContext
 	return w.BaseDN, nil
 
-}
-
-func (w *LDAPSession) getMetaData() (err error) {
-	sr := ldap.NewSearchRequest(
-		"",
-		ldap.ScopeBaseObject,
-		ldap.NeverDerefAliases,
-		0, 0, false,
-		"(objectClass=*)",
-		[]string{"*"},
-		nil)
-	res, err := w.LConn.Search(sr)
-	if err != nil {
-		return
-	}
-	if len(res.Entries) == 0 {
-		return fmt.Errorf("error getting metadata: No LDAP responses from server")
-	}
-	defaultNamingContext := res.Entries[0].GetAttributeValue("defaultNamingContext")
-	if defaultNamingContext == "" {
-		return fmt.Errorf("error getting metadata: attribute defaultNamingContext missing")
-	}
-	domainFunctionality := res.Entries[0].GetAttributeValue("domainFunctionality")
-	forestFunctionality := res.Entries[0].GetAttributeValue("forestFunctionality")
-	domainControllerFunctionality := res.Entries[0].GetAttributeValue("domainControllerFunctionality")
-	w.DomainInfo.DomainFunctionalityLevel = adschema.FunctionalityLevelsMapping[domainFunctionality]
-	w.DomainInfo.ForestFunctionalityLevel = adschema.FunctionalityLevelsMapping[forestFunctionality]
-	w.DomainInfo.DomainControllerFunctionalityLevel = adschema.FunctionalityLevelsMapping[domainControllerFunctionality]
-	w.DomainInfo.ServerDNSName = res.Entries[0].GetAttributeValue("dnsHostName")
-	w.BaseDN = defaultNamingContext
-	w.DomainInfo.Metadata = res
-	return nil
 }
 
 func (w *LDAPSession) ReturnMetadataResults() error {

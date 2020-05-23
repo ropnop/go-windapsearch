@@ -21,9 +21,8 @@ func FindLDAPServers(domain string) (servers []string, err error) {
 	}
 	// also resolve the domain itself and return that IP
 	domain_ips, _ := net.LookupHost(domain)
-	for _, s := range domain_ips {
-		servers = append(servers, s)
-	}
+	servers = append(servers, domain_ips...)
+
 	if len(servers) == 0 {
 		err = fmt.Errorf("no LDAP servers found for domain: %s", domain)
 		return
