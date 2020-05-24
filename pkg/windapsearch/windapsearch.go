@@ -152,7 +152,7 @@ func (w *WindapSearchSession) GetModuleByName(name string) modules.Module {
 }
 
 func (w *WindapSearchSession) ShowUsage() {
-	fmt.Fprintf(os.Stderr, "windapsearch: a tool to perform Windows domain enumeration through LDAP queries\n%s\nUsage: %s [options] -m [module]\n\nOptions:\n", buildinfo.FormatVersionString(), os.Args[0])
+	fmt.Fprintf(os.Stderr, "windapsearch: a tool to perform Windows domain enumeration through LDAP queries\n%s\nUsage: %s [options] -m [module] [module options]\n\nOptions:\n", buildinfo.FormatVersionString(), os.Args[0])
 	w.Options.FlagSet.PrintDefaults()
 	if w.Module == nil {
 		fmt.Fprintf(os.Stderr, "\nAvailable modules:\n%s", w.ModuleDescriptionString())
