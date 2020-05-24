@@ -51,7 +51,7 @@ func init() {
 	if err != nil {
 		curDir = "." //hack
 	}
-	binDir = path.Join(curDir, "bin")
+	binDir = curDir
 	distDir = path.Join(curDir, "dist")
 }
 
@@ -61,7 +61,7 @@ func Build() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("[+] Compiled binary to %s\n", binDir)
+	fmt.Printf("[+] Compiled binary to %s/\n", binDir)
 	return nil
 }
 
