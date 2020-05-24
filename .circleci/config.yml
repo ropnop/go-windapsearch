@@ -9,11 +9,6 @@ jobs:
           name: Build windapsearch
           command: go build github.com/ropnop/go-windapsearch/cmd/...
       - run:
-          name: Run staticcheck
-          command: |
-            go get honnef.co/go/tools/cmd/staticcheck
-            staticcheck github.com/ropnop/go-windapsearch/...
-      - run:
           name: Install build deps
           command: |
             go get github.com/mitchellh/gox
