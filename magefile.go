@@ -34,7 +34,7 @@ var ldflags = `-w -s` +
 	` -X $PKG/pkg/buildinfo.Version=$VERSION` +
 	` -X $PKG/pkg/buildinfo.BuildNumber=$BUILDNUM`
 
-var targets = "linux/amd64 darwin/amd64 windows/amd64 linux/arm64"
+var targets = "linux/amd64 darwin/amd64 windows/amd64"
 
 var goexe = "go"
 
