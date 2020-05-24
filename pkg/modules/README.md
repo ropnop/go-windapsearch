@@ -29,8 +29,11 @@ Also, `dn` will always be included as an attribute by default since it is always
 
 ## admin-objects
 **Description**: `Enumerate all objects with protected ACLs (i.e admins)`
+
 **Default Attrs**: `cn`
+
 **Base Filter**: `(adminCount=1)`
+
 **Additional Options**: ``
 
 This module searches for any and all LDAP entries that have `adminCount=1`, indicating that they have protected ACLs, which means they are highly privileged objects (e.g. Domain Admins, priveleged groups, etc)
@@ -46,8 +49,11 @@ $ ./windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m admin-ob
 
 ## computers
 **Description**: `Enumerate AD Computers`
+
 **Default Attrs**: `cn, dNSHostName, operatingSystem, operatingSystemVersion,operatingSystemServicePack`
+
 **Base Filter**: `(objectClass=Computer)`
+
 **Additional Options**: ``
 
 This module searches for all AD joined computers, and displays LDAP information about the computers, including DNS name and OS version.
@@ -66,8 +72,11 @@ $ ./windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m computer
 
 ## custom
 **Description**: `Run a custom LDAP syntax filter`
+
 **Default Attrs**: `*`
+
 **Base Filter**: `custom`
+
 **Additional Options**: `--filter`
 
 The module lets you specify a custom LDAP syntax filter to run, and returns all attributes by default. *Note: your filter must be valid LDAP filter syntax and wrapped in parantheses*
@@ -85,8 +94,11 @@ $ ./bin/windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p GoPadres98 -m
 
 ## domain-admins
 **Description**: `Recursively list all users objects in Domain Admins group`
+
 **Default Attrs**: `cn, sAMAccountName`
+
 **Base Filter**: `(&(objectClass=user)(|(memberof:1.2.840.113556.1.4.1941:=CN=Domain Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domain-Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domain Administrators,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domain-Administrators,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domänen Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domänen-Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domain Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domain-Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domänen Administratoren,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domänen-Administratoren,CN=Users,DC=lab,DC=ropnop,DC=com)))`
+
 **Additional Options**: ``
 
 This module lists every user object that is a member of the Domain Admins group. It performs recursive lookups using the OID `LDAP_MATCHING_RULE_IN_CHAIN`, so it will also display any user that is transitively part of the Domain Admins group as well. The filter includes language variations of the `Domain Admins` group too.
@@ -103,8 +115,11 @@ $ ./windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m domain-a
 
 ## gpos
 **Description**: `Enumerate Group Policy Objects`
+
 **Default Attrs**: `displayName, gPCFileSysPath`
+
 **Base Filter**: `(objectClass=groupPolicyContainer)`
+
 **Additional Options**: ``
 
 This module lists Group Policy Objects found in LDAP. It will display the display name and SYSVOL path by default:
@@ -121,8 +136,11 @@ $ ./windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m gpos -j 
 
 ## groups
 **Description**: `List all AD groups`
+
 **Default Attrs**: `cn`
+
 **Base Filter**: `(objectcategory=group)`
+
 **Additional Options**: `-s / --search`
 
 This module lists all group objects. By default it only displays the CN. Optionally, it takes a `search` option to narrow down groups.
@@ -146,8 +164,11 @@ $ ./windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m groups -
 
 ## members
 **Description**: `Query for members of a group`
+
 **Default Attrs**: `cn, sAMAccountName`
+
 **Base Filter**: `(memberOf=<group_dn>)`
+
 **Additional Options**: `-g / --group, -r / --recursive, -s / --search, --users`
 
 This module lists members of a group. You must specify a group with `-g` by its full distinguished name, or perform a search with `-s`. If more than one match is found, the module will prompt you for which group you meant.
@@ -175,8 +196,11 @@ Enter a number: 1
 
 ## metadata
 **Description**: `Print LDAP server metadata`
+
 **Default Attrs**: `defaultNamingContext, domainFunctionality, forestFunctionality, domainControllerFunctionality, dnsHostName`
+
 **Base Filter**: `(objectClass=*)`
+
 **Additional Options**: ``
 
 This module queries the LDAP server for metadata. It does not require an authenticated bind. By default it returns functionality levels, base DN, and DNS info
@@ -197,8 +221,11 @@ $ ./windapsearch -d lab.ropnop.com -m metadata -j | jq .
 
 ## privileged-users
 **Description**: `Recursively list members of all highly privileged groups`
+
 **Default Attrs**: `cn, sAMAccountName`
+
 **Base Filter**: `(&(objectClass=user)(|(memberof:1.2.840.113556.1.4.1941:=CN=Administrators,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Enterprise Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Schema Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Account Operators,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Backup Operators,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Server Management,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Konten-Operatoren,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Sicherungs-Operatoren,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Server-Operatoren,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Schema-Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domain Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domain-Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domain Administrators,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domain-Administrators,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domänen Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domänen-Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domain Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domain-Admins,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domänen Administratoren,CN=Users,DC=lab,DC=ropnop,DC=com)(memberof:1.2.840.113556.1.4.1941:=CN=Domänen-Administratoren,CN=Users,DC=lab,DC=ropnop,DC=com)))`
+
 **Additional Options**: ``
 
 This module recursively lists all members of Domain Admins and every other highly privileged group (e.g. `Schema Admins`, `Backup Operators`, etc)
@@ -215,8 +242,11 @@ $ ./windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m privileg
 
 ## search
 **Description**: `Perform an ANR Search and return the results`
+
 **Default Attrs**: `*`
+
 **Base Filter**: `(anr=<search_term>)`
+
 **Additional Options**: `--all, -s / --search`
 
 This module performs an [Ambiguous Name Resolution](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/1a9177f4-0272-4ab8-aa22-3c3eafd39e4b) search. If more than one match is found, it will prompt you for the entry you wish to retrieve. If `--all` is specified, it will not prompt and instead dump every matching entry.
@@ -239,8 +269,11 @@ Enter a number: 1
 
 ## unconstrained
 **Description**: `Find objects that allow unconstrained delegation`
+
 **Default Attrs**: `cn, sAMAccountName`
+
 **Base Filter**: `(userAccountControl:1.2.840.113556.1.4.803:=524288)`
+
 **Additional Options**: `--computers, --users`
 
 This module will search for LDAP objects that allow for unconstrained delegation. By default it will list all objects, though you can limit it either computers or users by using `--computers` or `--users`, respectively.
@@ -257,8 +290,11 @@ $ ./windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m unconstr
 
 ## user-spns
 **Description**: `Enumerate all users objects with Service Principal Names (for kerberoasting)`
+
 **Default Attrs**: `cn, sAMAccountName, servicePrincipalName`
+
 **Base Filter**: `(&(&(servicePrincipalName=*)(UserAccountControl:1.2.840.113556.1.4.803:=512))(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))`
+
 **Additional Options**: ``
 
 This module will identify user objects with servicePrincipalNames defined, which can be used for kerberoasting.
@@ -278,8 +314,11 @@ $ ./windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m user-spn
 
 ## users
 **Description**: `List all user objects`
+
 **Default Attrs**: `cn, sAMAccountName, userPrincipalName`
+
 **Base Filter**: `(objectcategory=user)`
+
 **Additional Options**: `--filter, -s / --search`
 
 This module lists every LDAP user object. Depending on the size of the domain, this can get very big. You can limit results by adding an additional LDAP syntax filter with `--filter`, or an ANR search term with `--search`.
