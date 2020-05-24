@@ -1,0 +1,58 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: cimg/go:1.14
+    steps:
+      - checkout
+      - run:
+          name: Build windapsearch
+          command: go build github.com/ropnop/go-windapsearch/cmd/...
+      - run:
+          name: Run staticcheck
+          command: |
+            go get honnef.co/go/tools/cmd/staticcheck
+            staticcheck github.com/ropnop/go-windapsearch/...
+      - run:
+          name: Install build deps
+          command: |
+            go get github.com/mitchellh/gox
+            go get github.com/magefile/mage
+      - run:
+          name: Cross build versions
+          command: VERSION=${CIRCLE_TAG} mage dist
+      - store_artifacts:
+          path: ./dist
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - ./*
+
+  github-release:
+    docker:
+      - image: cibuilds/github:0.13
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run:
+          name: "Publish Binaries on Github"
+          command: |
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./artifacts/
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - github-release:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+          context: "Github Token"
+          requires:
+            - build
