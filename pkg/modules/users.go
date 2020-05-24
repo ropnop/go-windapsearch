@@ -44,7 +44,7 @@ func (u *UsersModule) FlagSet() *pflag.FlagSet {
 }
 
 func (u *UsersModule) DefaultAttrs() []string {
-	return []string{"cn", "sAMAccountName"}
+	return []string{"cn", "sAMAccountName", "userPrincipalName"}
 }
 
 func (u *UsersModule) Run(lSession *ldapsession.LDAPSession, attrs []string) error {

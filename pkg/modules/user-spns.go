@@ -24,7 +24,7 @@ func (u UserSPNsModule) FlagSet() *pflag.FlagSet {
 }
 
 func (u UserSPNsModule) DefaultAttrs() []string {
-	return []string{"cn", "servicePrincipalName"}
+	return []string{"cn", "sAMAccountName", "servicePrincipalName"}
 }
 
 func (u UserSPNsModule) Filter() string {

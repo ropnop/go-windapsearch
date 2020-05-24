@@ -37,7 +37,7 @@ func (g *GroupsModule) FlagSet() *pflag.FlagSet {
 }
 
 func (g *GroupsModule) DefaultAttrs() []string {
-	return []string{"distinguishedName", "cn"}
+	return []string{"cn"}
 }
 
 func (g *GroupsModule) Run(lSession *ldapsession.LDAPSession, attrs []string) error {

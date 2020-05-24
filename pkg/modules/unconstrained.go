@@ -20,7 +20,7 @@ func (u UnconstrainedModule) Name() string {
 }
 
 func (u UnconstrainedModule) Description() string {
-	return "find objects that allow unconstrained delegation"
+	return "Find objects that allow unconstrained delegation"
 }
 
 func (u *UnconstrainedModule) FlagSet() *pflag.FlagSet {

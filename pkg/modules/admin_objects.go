@@ -24,7 +24,7 @@ func (AdminObjects) FlagSet() *pflag.FlagSet {
 }
 
 func (AdminObjects) DefaultAttrs() []string {
-	return []string{"distinguishedName"}
+	return []string{"cn"}
 }
 
 func (AdminObjects) Run(session *ldapsession.LDAPSession, attrs []string) error {
