@@ -171,11 +171,6 @@ func (w *WindapSearchSession) Run() (err error) {
 	w.Options.FlagSet.Parse(os.Args[:])
 
 	w.LoadModule()
-	if w.Module == nil {
-		fmt.Printf("[!] You must specify a valid module to use\n")
-		fmt.Printf(" Available modules: \n%s", w.ModuleDescriptionString())
-		return nil
-	}
 
 	//w.Options.ModuleFlags.AddFlagSet(w.Options.FlagSet)
 	w.Options.FlagSet.AddFlagSet(w.Options.ModuleFlags)
@@ -213,8 +208,7 @@ func (w *WindapSearchSession) Run() (err error) {
 
 	if w.Options.Domain == "" && w.Options.DomainController == "" {
 		w.ShowUsage()
-		fmt.Println()
-		fmt.Println("[!] You must specify either a domain or an IP address of a domain controller")
+		fmt.Fprintf(os.Stderr, "\n[!] You must specify either a domain or an IP address of a domain controller\n")
 		return
 	}
 	password := w.Options.Password
@@ -250,7 +244,11 @@ func (w *WindapSearchSession) Run() (err error) {
 }
 
 func (w *WindapSearchSession) StartCLI() error {
-
+	if w.Module == nil {
+		fmt.Fprintf(os.Stderr, "[!] You must specify a valid module to use\n")
+		fmt.Fprintf(os.Stderr, " Available modules: \n%s", w.ModuleDescriptionString())
+		return nil
+	}
 	err := w.runModule()
 	if err != nil {
 		return err
