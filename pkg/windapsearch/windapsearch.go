@@ -70,7 +70,7 @@ func NewSession() *WindapSearchSession {
 	//wFlags.BoolVarP(&w.Options.Interactive, "interactive", "i", false, "Start in interactive mode") //TODO
 	wFlags.BoolVar(&w.Options.Version, "version", false, "Show version info and exit")
 	wFlags.BoolVarP(&w.Options.Verbose, "verbose", "v", false, "Show info logs")
-	wFlags.BoolVar(&w.Options.Debug, "debug", false, "Show debug logging")
+	wFlags.BoolVar(&w.Options.Debug, "debug", false, "Show debug logs")
 	wFlags.BoolVarP(&w.Options.Help, "help", "h", false, "Show this help")
 
 	pflag.ErrHelp = errors.New("")
@@ -92,10 +92,11 @@ func NewSession() *WindapSearchSession {
 	logger.Out = os.Stderr // default log to stderr
 	logger.SetLevel(logrus.ErrorLevel)
 	logger.SetFormatter(&logrus.TextFormatter{
-		FullTimestamp: true,
-		PadLevelText:  false,
+		FullTimestamp:          true,
+		DisableLevelTruncation: true,
 	})
 	w.Log = logger.WithFields(logrus.Fields{"package": "windapsearch"})
+
 	// set up cancelling, catch SIGINT
 	w.ctx, w.cancel = context.WithCancel(context.Background())
 	c := make(chan os.Signal, 1)
@@ -170,6 +171,15 @@ func (w *WindapSearchSession) Run() (err error) {
 	w.Options.FlagSet.Parse(os.Args[:])
 
 	w.LoadModule()
+	if w.Module == nil {
+		fmt.Printf("[!] You must specify a valid module to use\n")
+		fmt.Printf(" Available modules: \n%s", w.ModuleDescriptionString())
+		return nil
+	}
+
+	//w.Options.ModuleFlags.AddFlagSet(w.Options.FlagSet)
+	w.Options.FlagSet.AddFlagSet(w.Options.ModuleFlags)
+	w.Options.FlagSet.Parse(os.Args[:])
 
 	if w.Options.Help {
 		w.ShowUsage()
@@ -240,14 +250,6 @@ func (w *WindapSearchSession) Run() (err error) {
 }
 
 func (w *WindapSearchSession) StartCLI() error {
-	if w.Module == nil {
-		fmt.Printf("[!] You must specify a valid module to use\n")
-		fmt.Printf(" Available modules: \n%s", w.ModuleDescriptionString())
-		return nil
-	}
-
-	w.Options.ModuleFlags.AddFlagSet(w.Options.FlagSet)
-	w.Options.ModuleFlags.Parse(os.Args[:])
 
 	err := w.runModule()
 	if err != nil {

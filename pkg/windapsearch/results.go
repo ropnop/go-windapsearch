@@ -47,13 +47,14 @@ func (w *WindapSearchSession) searchResultWorker(chans *ldapsession.ResultChanne
 			if !ok {
 				return
 			}
+			w.Log.WithField("DN", entry.DN).Debug("parsing entry")
 			e := &adschema.ADEntry{entry}
 			if !w.Options.JSON {
 				out <- []byte(e.LDAPFormat())
 			} else {
 				b, err := json.Marshal(e)
 				if err != nil {
-					w.Log.WithField("DN", e.DN).Warn("error marshaling entry", e.DN)
+					w.Log.WithField("DN", e.DN).Warn("error marshaling entry")
 				}
 				out <- b
 			}
