@@ -5,6 +5,8 @@ In addition to performing common LDAP searches, `windapsearch` now also has the 
 
 This is a complete re-write of my earlier [Python implementation](https://github.com/ropnop/windapsearch). For some more background/explanation on how I'm using Go, and more advanced usage examples see [this blog post](TODO).
 
+For usage examples of each of the modules, view the [modules README](pkg/modules/README.md)
+
 ## Installation
 You can download pre-compiled binaries for amd64 Linux/Mac/Windows from the [latest releases](https://github.com/ropnop/go-windapsearch/releases)
 
