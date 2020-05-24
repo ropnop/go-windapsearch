@@ -47,7 +47,7 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /^v\d+\.\d+*$/
+              only: /^v\d+\.\d+.*$/
           context: "Github Token"
           requires:
             - build
