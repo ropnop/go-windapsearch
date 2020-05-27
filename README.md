@@ -1,4 +1,6 @@
 # go-windapsearch
+[![CircleCI](https://circleci.com/gh/ropnop/go-windapsearch.svg?style=svg)](https://circleci.com/gh/ropnop/go-windapsearch)
+
 `windapsearch` is a tool to assist in Active Directory Domain enumeration through LDAP queries. It contains several modules to enumerate users, groups, computers, as well as perform searching and unauthenticated information gathering.
 
 In addition to performing common LDAP searches, `windapsearch` now also has the option to convert LDAP results to JSON format for easy parsing. When performing JSON encoding, `windapsearch` will automatically convert certain LDAP attributes to a more human friendly format as well (e.g. timestamps, GUIDs, enumerations, etc)
