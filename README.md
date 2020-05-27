@@ -17,10 +17,11 @@ $ git clone https://github.com/ropnop/go-windapsearch.git && cd go-windapsearch
 $ go get github.com/magefile/mage
 $ mage
 Targets:
-  build    Compile all cmd packages for current GOOS and GOARCh and put in ./bin
+  build    Compile windapsearch for current OS and ARCH
   clean    Delete bin and dist dirs
   dist     Cross-compile for Windows, Linux, Mac x64 and put in ./dist
 $ mage build
+$ ./windapsearch --version
 ```
 
 # Usage
