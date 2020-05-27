@@ -6,12 +6,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/magefile/mage/mg"
-	"github.com/magefile/mage/sh"
 	"os"
 	"os/exec"
 	"path"
 	"time"
+
+	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
 )
 
 const (
@@ -55,7 +56,7 @@ func init() {
 	distDir = path.Join(curDir, "dist")
 }
 
-// Build Compile all cmd packages for current GOOS and GOARCh and put in ./bin
+// Build Compile windapsearch for current OS and ARCH
 func Build() error {
 	err := sh.RunWith(flagEnv(), goexe, "install", "-ldflags", ldflags, "$PKG/cmd/...")
 	if err != nil {
