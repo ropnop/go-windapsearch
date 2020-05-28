@@ -16,7 +16,7 @@ The following modules have been implemented, with functionality copied from the 
  * [privileged-users](#privileged-users)
  * [search](#search)
  * [unconstrained](#unconstrained)
- * [user-spns](#user-spns)]
+ * [user-spns](#user-spns)
  * [users](#users)
 
 **Common Options**
