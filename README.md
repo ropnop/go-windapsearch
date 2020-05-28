@@ -3,11 +3,11 @@
 
 `windapsearch` is a tool to assist in Active Directory Domain enumeration through LDAP queries. It contains several modules to enumerate users, groups, computers, as well as perform searching and unauthenticated information gathering.
 
+For usage examples of each of the modules, view the [modules README](pkg/modules/README.md)
+
 In addition to performing common LDAP searches, `windapsearch` now also has the option to convert LDAP results to JSON format for easy parsing. When performing JSON encoding, `windapsearch` will automatically convert certain LDAP attributes to a more human friendly format as well (e.g. timestamps, GUIDs, enumerations, etc)
 
 This is a complete re-write of my earlier [Python implementation](https://github.com/ropnop/windapsearch). For some more background/explanation on how I'm using Go, and more advanced usage examples see [this blog post](TODO).
-
-For usage examples of each of the modules, view the [modules README](pkg/modules/README.md)
 
 ## Installation
 You can download pre-compiled binaries for amd64 Linux/Mac/Windows from the [latest releases](https://github.com/ropnop/go-windapsearch/releases)
