@@ -4,17 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"os"
+	"os/signal"
+	"strings"
+	"text/tabwriter"
+
 	"github.com/ropnop/go-windapsearch/pkg/buildinfo"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/ropnop/go-windapsearch/pkg/modules"
 	"github.com/ropnop/go-windapsearch/pkg/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
-	"io"
-	"os"
-	"os/signal"
-	"strings"
-	"text/tabwriter"
 )
 
 type WindapSearchSession struct {
@@ -212,8 +213,14 @@ func (w *WindapSearchSession) Run() (err error) {
 		return
 	}
 	password := w.Options.Password
-	if w.Options.Username != "" && password == "" {
-		password, err = utils.SecurePrompt(fmt.Sprintf("Password for [%s]", w.Options.Username))
+	var username string
+	if len(strings.Split(w.Options.Username, "@")) == 1 {
+		username = fmt.Sprintf("%s@%s", w.Options.Username, w.Options.Domain)
+	} else {
+		username = w.Options.Username
+	}
+	if username != "" && password == "" {
+		password, err = utils.SecurePrompt(fmt.Sprintf("Password for [%s]", username))
 		if err != nil {
 			return err
 		}
@@ -222,7 +229,7 @@ func (w *WindapSearchSession) Run() (err error) {
 	ldapOptions := ldapsession.LDAPSessionOptions{
 		Domain:           w.Options.Domain,
 		DomainController: w.Options.DomainController,
-		Username:         w.Options.Username,
+		Username:         username,
 		Password:         password,
 		Port:             w.Options.Port,
 		Secure:           w.Options.Secure,
