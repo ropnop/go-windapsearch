@@ -2,8 +2,8 @@ package modules
 
 import (
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
+	"github.com/ropnop/ldap/v3"
 	"github.com/spf13/pflag"
-	"gopkg.in/ldap.v3"
 )
 
 type FunctionalityModule struct{}

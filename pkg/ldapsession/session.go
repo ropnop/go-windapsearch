@@ -5,8 +5,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/ropnop/go-windapsearch/pkg/dns"
+	"github.com/ropnop/ldap/v3"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/ldap.v3"
 	"strings"
 )
 
@@ -157,9 +157,13 @@ func (w *LDAPSession) SimpleBind(username, password string) (err error) {
 }
 
 func (w *LDAPSession) NTLMBind(username, password, hash string) (err error) {
-	parts := strings.Split(username, "@")
-	user := parts[0]
-	domain := strings.Join(parts[1:], "")
+	userParts := strings.Split(username, "@")
+	user := userParts[0]
+	domain := strings.Join(userParts[1:], "")
+
+	if hash != "" {
+		return w.LConn.NTLMBindWithHash(domain, user, hash)
+	}
 	return w.LConn.NTLMBind(domain, user, password)
 }
 

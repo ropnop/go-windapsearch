@@ -216,7 +216,7 @@ func (w *WindapSearchSession) Run() (err error) {
 		return
 	}
 	password := w.Options.Password
-	if w.Options.Username != "" && password == "" {
+	if w.Options.Username != "" && password == "" && w.Options.NTLMHash == "" {
 		password, err = utils.SecurePrompt(fmt.Sprintf("Password for [%s]", w.Options.Username))
 		if err != nil {
 			return err

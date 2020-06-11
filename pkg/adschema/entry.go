@@ -3,7 +3,7 @@ package adschema
 import (
 	"encoding/base64"
 	"fmt"
-	"gopkg.in/ldap.v3"
+	"github.com/ropnop/ldap/v3"
 	"strconv"
 	"strings"
 	"unicode/utf8"

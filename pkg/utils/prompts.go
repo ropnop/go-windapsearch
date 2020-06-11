@@ -2,9 +2,9 @@ package utils
 
 import (
 	"fmt"
+	"github.com/ropnop/ldap/v3"
 	"github.com/tcnksm/go-input"
 	"golang.org/x/crypto/ssh/terminal"
-	"gopkg.in/ldap.v3"
 	"os"
 	"syscall"
 )
