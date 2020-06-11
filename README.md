@@ -30,9 +30,8 @@ $ ./windapsearch --version
 `windapsearch` is a standalone binary with multiple modules for various common LDAP queries
 
 ```
-$ ./windapsearch -h
 windapsearch: a tool to perform Windows domain enumeration through LDAP queries
-Version: dev | Commit: 959ff72 | Built on: 05/23/20 | Built with: go1.14.3
+Version: dev (131fd6d) | Built: 06/10/20 (go1.14.3) | Ronnie Flathers @ropnop
 
 Usage: ./windapsearch [options] -m [module] [module options]
 
@@ -42,6 +41,8 @@ Options:
   -u, --username string   The full username with domain to bind with (e.g. 'ropnop@lab.example.com' or 'LAB\ropnop')
                            If not specified, will attempt anonymous bind
   -p, --password string   Password to use. If not specified, will be prompted for
+      --hash string       NTLM Hash to use instead of password (i.e. pass-the-hash
+      --ntlm              Use NTLM auth (automatic if hash is set)
       --port int          Port to connect to (if non standard)
       --secure            Use LDAPS. This will not verify TLS certs, however. (default: false)
       --full              Output all attributes from LDAP
@@ -50,7 +51,7 @@ Options:
       --page-size int     LDAP page size to use (default 1000)
       --version           Show version info and exit
   -v, --verbose           Show info logs
-      --debug             Show debug logging
+      --debug             Show debug logs
   -h, --help              Show this help
   -m, --module string     Module to use
 
@@ -65,7 +66,7 @@ Available modules:
     metadata            Print LDAP server metadata
     privileged-users    Recursively list members of all highly privileged groups
     search              Perform an ANR Search and return the results
-    unconstrained       find objects that allow unconstrained delegation
+    unconstrained       Find objects that allow unconstrained delegation
     user-spns           Enumerate all users objects with Service Principal Names (for kerberoasting)
     users               List all user objects
 ```
