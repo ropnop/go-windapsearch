@@ -1,8 +1,8 @@
 module github.com/ropnop/go-windapsearch
 
-replace github.com/ropnop/ldap/v3 => /Users/RonnieFlathers/go/src/github.com/ropnop/ldap/v3
+//replace github.com/ropnop/ldap/v3 => /Users/RonnieFlathers/go/src/github.com/ropnop/ldap/v3
 
-replace github.com/Azure/go-ntlmssp => /Users/RonnieFlathers/go/src/github.com/ropnop/go-ntlmssp
+//replace github.com/Azure/go-ntlmssp => /Users/RonnieFlathers/go/src/github.com/ropnop/go-ntlmssp
 
 //replace github.com/ropnop/go-ntlm => /Users/RonnieFlathers/go/src/github.com/ropnop/go-ntlm
 
@@ -11,12 +11,12 @@ replace github.com/Azure/go-ntlmssp => /Users/RonnieFlathers/go/src/github.com/r
 go 1.13
 
 require (
-	github.com/Azure/go-ntlmssp v0.0.0-20191115210519-2b2be6cc8ed4
 	github.com/audibleblink/msldapuac v0.2.0
 	github.com/bwmarrin/go-objectsid v0.0.0-20191126144531-5fee401a2f37
-	github.com/go-asn1-ber/asn1-ber v1.3.1
+	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/magefile/mage v1.9.0
-	github.com/ropnop/ldap/v3 v3.1.11-0.20200607232004-b620fa79e9be
+	github.com/mitchellh/gox v1.0.1 // indirect
+	github.com/ropnop/ldap/v3 v3.1.11-0.20200611014906-485c70f019f1
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/pflag v1.0.5
 	github.com/tcnksm/go-input v0.0.0-20180404061846-548a7d7a8ee8
