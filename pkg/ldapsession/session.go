@@ -4,10 +4,11 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"strings"
+
 	"github.com/ropnop/go-windapsearch/pkg/dns"
 	"github.com/ropnop/ldap/v3"
 	"github.com/sirupsen/logrus"
-	"strings"
 )
 
 type LDAPSessionOptions struct {
@@ -162,8 +163,10 @@ func (w *LDAPSession) NTLMBind(username, password, hash string) (err error) {
 	domain := strings.Join(userParts[1:], "")
 
 	if hash != "" {
+		w.Log.Infof("attempting PtH NTLM bind for %q", user)
 		return w.LConn.NTLMBindWithHash(domain, user, hash)
 	}
+	w.Log.Infof("attempting NTLM bind for %q", user)
 	return w.LConn.NTLMBind(domain, user, password)
 }
 
