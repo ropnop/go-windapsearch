@@ -102,6 +102,10 @@ func NewSession() *WindapSearchSession {
 	})
 	w.Log = logger.WithFields(logrus.Fields{"package": "windapsearch"})
 
+	return &w
+}
+
+func (w *WindapSearchSession) handleInterrupt() {
 	// set up cancelling, catch SIGINT
 	w.ctx, w.cancel = context.WithCancel(context.Background())
 	c := make(chan os.Signal, 1)
@@ -110,8 +114,6 @@ func NewSession() *WindapSearchSession {
 		<-c
 		w.cancel()
 	}()
-
-	return &w
 }
 
 func (w *WindapSearchSession) RegisterModule(mod modules.Module) {
@@ -229,6 +231,9 @@ func (w *WindapSearchSession) Run() (err error) {
 			return err
 		}
 	}
+
+	// now that ldap connections are opened, handle interrupts gracefully
+	w.handleInterrupt()
 
 	ldapOptions := ldapsession.LDAPSessionOptions{
 		Domain:           w.Options.Domain,
