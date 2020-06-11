@@ -15,5 +15,5 @@ var (
 
 func FormatVersionString() string {
 	GoVersion = runtime.Version()
-	return fmt.Sprintf("Version: %s | Commit: %s | Built on: %s | Built with: %s\n", Version, GitSHA, BuildDate, GoVersion)
+	return fmt.Sprintf("Version: %s (%s) | Built: %s (%s) | Ronnie Flathers @ropnop\n", Version, GitSHA, BuildDate, GoVersion)
 }
