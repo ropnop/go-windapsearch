@@ -3,8 +3,8 @@ package ldapsession
 import (
 	"errors"
 	"fmt"
+	"github.com/ropnop/ldap/v3"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/ldap.v3"
 )
 
 func (w *LDAPSession) MakeSimpleSearchRequest(filter string, attrs []string) *ldap.SearchRequest {

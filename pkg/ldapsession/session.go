@@ -4,9 +4,11 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"strings"
+
 	"github.com/ropnop/go-windapsearch/pkg/dns"
+	"github.com/ropnop/ldap/v3"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/ldap.v3"
 )
 
 type LDAPSessionOptions struct {
@@ -14,6 +16,8 @@ type LDAPSessionOptions struct {
 	DomainController string
 	Username         string
 	Password         string
+	Hash             string
+	UseNTLM          bool
 	Port             int
 	Secure           bool
 	PageSize         int
@@ -87,7 +91,12 @@ func NewLDAPSession(options *LDAPSessionOptions, ctx context.Context) (sess *LDA
 	sess.LConn = lConn
 	sess.PageSize = uint32(options.PageSize)
 
-	err = sess.Bind(options.Username, options.Password)
+	if options.UseNTLM || options.Hash != "" {
+		err = sess.NTLMBind(options.Username, options.Password, options.Hash)
+	} else {
+		err = sess.SimpleBind(options.Username, options.Password)
+	}
+
 	if err != nil {
 		return
 	}
@@ -136,7 +145,7 @@ func (w *LDAPSession) CloseChannels() {
 //	w.ctx = ctx
 //}
 
-func (w *LDAPSession) Bind(username, password string) (err error) {
+func (w *LDAPSession) SimpleBind(username, password string) (err error) {
 	if username == "" {
 		err = w.LConn.UnauthenticatedBind("")
 	} else {
@@ -146,6 +155,19 @@ func (w *LDAPSession) Bind(username, password string) (err error) {
 		return
 	}
 	return
+}
+
+func (w *LDAPSession) NTLMBind(username, password, hash string) (err error) {
+	userParts := strings.Split(username, "@")
+	user := userParts[0]
+	domain := strings.Join(userParts[1:], "")
+
+	if hash != "" {
+		w.Log.Infof("attempting PtH NTLM bind for %q", user)
+		return w.LConn.NTLMBindWithHash(domain, user, hash)
+	}
+	w.Log.Infof("attempting NTLM bind for %q", user)
+	return w.LConn.NTLMBind(domain, user, password)
 }
 
 func (w *LDAPSession) Close() {
