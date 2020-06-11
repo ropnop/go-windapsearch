@@ -41,7 +41,7 @@ Options:
   -u, --username string   The full username with domain to bind with (e.g. 'ropnop@lab.example.com' or 'LAB\ropnop')
                            If not specified, will attempt anonymous bind
   -p, --password string   Password to use. If not specified, will be prompted for
-      --hash string       NTLM Hash to use instead of password (i.e. pass-the-hash
+      --hash string       NTLM Hash to use instead of password (i.e. pass-the-hash)
       --ntlm              Use NTLM auth (automatic if hash is set)
       --port int          Port to connect to (if non standard)
       --secure            Use LDAPS. This will not verify TLS certs, however. (default: false)

@@ -64,7 +64,7 @@ func NewSession() *WindapSearchSession {
 	wFlags.StringVar(&w.Options.DomainController, "dc", "", "The Domain Controller to query against")
 	wFlags.StringVarP(&w.Options.Username, "username", "u", "", "The full username with domain to bind with (e.g. 'ropnop@lab.example.com' or 'LAB\\ropnop')\n If not specified, will attempt anonymous bind")
 	wFlags.StringVarP(&w.Options.Password, "password", "p", "", "Password to use. If not specified, will be prompted for")
-	wFlags.StringVar(&w.Options.NTLMHash, "hash", "", "NTLM Hash to use instead of password (i.e. pass-the-hash")
+	wFlags.StringVar(&w.Options.NTLMHash, "hash", "", "NTLM Hash to use instead of password (i.e. pass-the-hash)")
 	wFlags.BoolVar(&w.Options.UseNTLM, "ntlm", false, "Use NTLM auth (automatic if hash is set)")
 	wFlags.IntVar(&w.Options.Port, "port", 0, "Port to connect to (if non standard)")
 	wFlags.BoolVar(&w.Options.Secure, "secure", false, "Use LDAPS. This will not verify TLS certs, however. (default: false)")
