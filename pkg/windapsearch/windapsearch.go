@@ -219,16 +219,23 @@ func (w *WindapSearchSession) Run() (err error) {
 		return
 	}
 	password := w.Options.Password
-	var username string
-	if len(strings.Split(w.Options.Username, "@")) == 1 {
-		username = fmt.Sprintf("%s@%s", w.Options.Username, w.Options.Domain)
-	} else {
-		username = w.Options.Username
+	username := w.Options.Username
+
+	if w.Options.UseNTLM && username == "" {
+		return fmt.Errorf("must provide username for NTLM authentication")
 	}
-	if username != "" && password == "" && w.Options.NTLMHash == "" {
-		password, err = utils.SecurePrompt(fmt.Sprintf("Password for [%s]", username))
-		if err != nil {
-			return err
+
+	if username != "" { // only prompt for password if username is provided
+		if len(strings.Split(w.Options.Username, "@")) == 1 {
+			username = fmt.Sprintf("%s@%s", w.Options.Username, w.Options.Domain)
+		} else {
+			username = w.Options.Username
+		}
+		if username != "" && password == "" && w.Options.NTLMHash == "" {
+			password, err = utils.SecurePrompt(fmt.Sprintf("Password for [%s]", username))
+			if err != nil {
+				return err
+			}
 		}
 	}
 
