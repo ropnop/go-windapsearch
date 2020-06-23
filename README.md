@@ -30,8 +30,9 @@ $ ./windapsearch --version
 `windapsearch` is a standalone binary with multiple modules for various common LDAP queries
 
 ```
+$ ./windapsearch -h
 windapsearch: a tool to perform Windows domain enumeration through LDAP queries
-Version: dev (131fd6d) | Built: 06/10/20 (go1.14.3) | Ronnie Flathers @ropnop
+Version: dev (f78ee36) | Built: 06/23/20 (go1.14.3) | Ronnie Flathers @ropnop
 
 Usage: ./windapsearch [options] -m [module] [module options]
 
@@ -45,6 +46,7 @@ Options:
       --ntlm              Use NTLM auth (automatic if hash is set)
       --port int          Port to connect to (if non standard)
       --secure            Use LDAPS. This will not verify TLS certs, however. (default: false)
+      --proxy string      SOCKS5 Proxy to use (e.g. 127.0.0.1:9050)
       --full              Output all attributes from LDAP
   -o, --output string     Save results to file
   -j, --json              Convert LDAP output to JSON
