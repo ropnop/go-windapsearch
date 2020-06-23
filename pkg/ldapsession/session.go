@@ -2,8 +2,9 @@ package ldapsession
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
+	"golang.org/x/net/proxy"
+	"net"
 	"strings"
 
 	"github.com/ropnop/go-windapsearch/pkg/dns"
@@ -20,6 +21,7 @@ type LDAPSessionOptions struct {
 	UseNTLM          bool
 	Port             int
 	Secure           bool
+	Proxy            string
 	PageSize         int
 	Logger           *logrus.Logger
 }
@@ -81,13 +83,31 @@ func NewLDAPSession(options *LDAPSessionOptions, ctx context.Context) (sess *LDA
 		url = fmt.Sprintf("ldap://%s:%d", dc, port)
 	}
 
-	lConn, err := ldap.DialURL(url)
-	if err != nil {
-		return
+	var conn net.Conn
+	defaultDailer := &net.Dialer{Timeout: ldap.DefaultTimeout}
+
+	// Use socks proxy if specified
+	if options.Proxy != "" {
+		pDialer, err := proxy.SOCKS5("tcp", options.Proxy, nil, defaultDailer)
+		if err != nil {
+			return nil, err
+		}
+		conn, err = pDialer.Dial("tcp", fmt.Sprintf("%s:%d", dc, port))
+		if err != nil {
+			return nil, err
+		}
+		sess.Log.Debugf("establishing connection through socks proxy at %s", options.Proxy)
+	} else {
+		conn, err = defaultDailer.Dial("tcp", fmt.Sprintf("%s:%d", dc, port))
+		if err != nil {
+			return
+		}
 	}
-	if options.Secure {
-		lConn.StartTLS(&tls.Config{InsecureSkipVerify: true})
-	}
+	sess.Log.Debugf("tcp connection established to %s:%d", dc, port)
+
+	lConn := ldap.NewConn(conn, options.Secure)
+	lConn.Start()
+
 	sess.LConn = lConn
 	sess.PageSize = uint32(options.PageSize)
 
