@@ -1,3 +1,5 @@
+github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c h1:/IBSNwUN8+eKzUzbJPqhK839ygXJ82sde8x3ogr6R28=
+github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c/go.mod h1:chxPXzSsl7ZWRAuOIE23GDNzjWuZquvFlgA8xmpunjU=
 github.com/audibleblink/bamflags v0.2.0 h1:xLsR8OO2mmbhpQglTvSKNJMnmQMI9L884eJ15zbu4mI=
 github.com/audibleblink/bamflags v0.2.0/go.mod h1:zpuLMpykftgB88SHYGBa1urg0uHn01R2pjeBed+JhB8=
 github.com/audibleblink/msldapuac v0.2.0 h1:1KFPLKWNmPGiCbd7HD/PPb5UuNOTvKRz1XcGeP2TyuI=
@@ -8,6 +10,13 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/go-asn1-ber/asn1-ber v1.5.0 h1:/S4hO/AO6tLMlPX0oftGSOcdGJJN/MuYzfgWRMn199E=
+github.com/go-asn1-ber/asn1-ber v1.5.0/go.mod h1:hEBeB/ic+5LoWskz+yKT7vGhhPYkProFKoKdwZRWMe0=
+github.com/go-ldap/ldap v3.0.3+incompatible h1:HTeSZO8hWMS1Rgb2Ziku6b8a7qRIZZMHjsvuZyatzwk=
+github.com/go-ldap/ldap/v3 v3.1.11-0.20200611014906-485c70f019f1 h1:H2uBrwnGXJfDQO0IU4mEWR2o3cKL6TFGIwVMpm0K/gU=
+github.com/go-ldap/ldap/v3 v3.1.11-0.20200611014906-485c70f019f1/go.mod h1:o5UhfnsGuNAUshdImfVxc/I6bEjjhUEGbVCjlkSEzKI=
+github.com/go-ldap/ldap/v3 v3.2.1 h1:mbP3BPfsULz5DuI3ejHuAypAbcg38Xv5T7eEHp3+XAE=
+github.com/go-ldap/ldap/v3 v3.2.1/go.mod h1:phWI+JSJ/eGvABjJxU7bT7CBv03KfS0e16+bQxLtjMw=
 github.com/hashicorp/go-version v1.0.0 h1:21MVWPKDphxa7ineQQTrCU5brh7OuVVAzGOCnnCPtE8=
 github.com/hashicorp/go-version v1.0.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hashicorp/go-version v1.2.0 h1:3vNe/fWF5CBgRIguda1meWhsZHy3m8gCJ5wx+dIzX/E=
@@ -32,8 +41,6 @@ github.com/ropnop/asn1-ber v1.4.2-0.20200607231232-d5eaafbc0920 h1:PhsjJ3vHzJCLE
 github.com/ropnop/asn1-ber v1.4.2-0.20200607231232-d5eaafbc0920/go.mod h1:iz1sKHwL1Yo6IuSMl+gg2GOZEjlPawm7Y3tIRe+lxlY=
 github.com/ropnop/go-ntlmssp v0.0.0-20200608000710-e582ce2e0915 h1:T4TpgiMHw5i81SCKEKggBYQEH65y4mfrVhoPhJFy6Mg=
 github.com/ropnop/go-ntlmssp v0.0.0-20200608000710-e582ce2e0915/go.mod h1:84Bt2uuBSCxtBl5Kbzd+e41cpqU3m7i4DPjjP5o90V0=
-github.com/ropnop/ldap/v3 v3.1.11-0.20200611014906-485c70f019f1 h1:H2uBrwnGXJfDQO0IU4mEWR2o3cKL6TFGIwVMpm0K/gU=
-github.com/ropnop/ldap/v3 v3.1.11-0.20200611014906-485c70f019f1/go.mod h1:o5UhfnsGuNAUshdImfVxc/I6bEjjhUEGbVCjlkSEzKI=
 github.com/sirupsen/logrus v1.6.0 h1:UBcNElsrwanuuMsnGSlYmtmgbb23qDR5dG+6X6Oo89I=
 github.com/sirupsen/logrus v1.6.0/go.mod h1:7uNnSEd1DgxDLC74fIahvMZmmYsHGZGEOFrfsX/uA88=
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
