@@ -40,6 +40,7 @@ type CommandLineOptions struct {
 	NTLMHash         string
 	UseNTLM          bool
 	Port             int
+	Proxy            string
 	Secure           bool
 	ResolveHosts     bool
 	Attributes       []string
@@ -68,6 +69,7 @@ func NewSession() *WindapSearchSession {
 	wFlags.BoolVar(&w.Options.UseNTLM, "ntlm", false, "Use NTLM auth (automatic if hash is set)")
 	wFlags.IntVar(&w.Options.Port, "port", 0, "Port to connect to (if non standard)")
 	wFlags.BoolVar(&w.Options.Secure, "secure", false, "Use LDAPS. This will not verify TLS certs, however. (default: false)")
+	wFlags.StringVar(&w.Options.Proxy, "proxy", "", "SOCKS5 Proxy to use (e.g. 127.0.0.1:9050)")
 	wFlags.BoolVar(&w.Options.FullAttributes, "full", false, "Output all attributes from LDAP")
 	wFlags.StringVarP(&w.Options.Output, "output", "o", "", "Save results to file")
 	wFlags.BoolVarP(&w.Options.JSON, "json", "j", false, "Convert LDAP output to JSON")
@@ -250,6 +252,7 @@ func (w *WindapSearchSession) Run() (err error) {
 		Hash:             w.Options.NTLMHash,
 		UseNTLM:          w.Options.UseNTLM,
 		Port:             w.Options.Port,
+		Proxy:            w.Options.Proxy,
 		Secure:           w.Options.Secure,
 		PageSize:         w.Options.PageSize,
 		Logger:           w.Log.Logger,
