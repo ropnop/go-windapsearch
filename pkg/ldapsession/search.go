@@ -3,7 +3,7 @@ package ldapsession
 import (
 	"errors"
 	"fmt"
-	"github.com/ropnop/ldap/v3"
+	"github.com/go-ldap/ldap/v3"
 	"github.com/sirupsen/logrus"
 )
 

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/ropnop/go-windapsearch/pkg/dns"
-	"github.com/ropnop/ldap/v3"
+	"github.com/go-ldap/ldap/v3"
 	"github.com/sirupsen/logrus"
 )
 

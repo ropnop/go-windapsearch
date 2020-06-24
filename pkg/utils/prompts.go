@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/ropnop/ldap/v3"
+	"github.com/go-ldap/ldap/v3"
 	"github.com/tcnksm/go-input"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
