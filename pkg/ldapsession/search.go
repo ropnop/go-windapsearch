@@ -3,6 +3,7 @@ package ldapsession
 import (
 	"errors"
 	"fmt"
+
 	"github.com/go-ldap/ldap/v3"
 	"github.com/sirupsen/logrus"
 )
@@ -43,7 +44,24 @@ func (w *LDAPSession) ManualWriteSearchResultsToChan(results *ldap.SearchResult)
 	for _, control := range results.Controls {
 		w.Channels.Controls <- control
 	}
+}
 
+func (w *LDAPSession) ManualWriteMultipleSearchResultsToChan(multipleResults []*ldap.SearchResult) {
+	defer w.CloseChannels()
+
+	for _, results := range multipleResults {
+		w.Log.Debugf("received search results, writing %d entries to channel", len(results.Entries))
+
+		for _, entry := range results.Entries {
+			w.Channels.Entries <- entry
+		}
+		for _, referral := range results.Referrals {
+			w.Channels.Referrals <- referral
+		}
+		for _, control := range results.Controls {
+			w.Channels.Controls <- control
+		}
+	}
 }
 
 // ExecuteSearchRequest performs a paged search and writes results to the LDAPsession's defined results channel.
