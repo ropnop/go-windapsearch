@@ -2,13 +2,15 @@ package ldapsession
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
-	"golang.org/x/net/proxy"
 	"net"
 	"strings"
 
-	"github.com/ropnop/go-windapsearch/pkg/dns"
+	"golang.org/x/net/proxy"
+
 	"github.com/go-ldap/ldap/v3"
+	"github.com/ropnop/go-windapsearch/pkg/dns"
 	"github.com/sirupsen/logrus"
 )
 
@@ -105,7 +107,15 @@ func NewLDAPSession(options *LDAPSessionOptions, ctx context.Context) (sess *LDA
 	}
 	sess.Log.Debugf("tcp connection established to %s:%d", dc, port)
 
-	lConn := ldap.NewConn(conn, options.Secure)
+	var lConn *ldap.Conn
+	if options.Secure {
+		tlsConn := tls.Client(conn, &tls.Config{InsecureSkipVerify: true})
+		lConn = ldap.NewConn(tlsConn, options.Secure)
+		sess.Log.Debug("TLS connection established")
+	} else {
+		lConn = ldap.NewConn(conn, options.Secure)
+	}
+
 	lConn.Start()
 
 	sess.LConn = lConn
