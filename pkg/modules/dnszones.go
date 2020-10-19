@@ -34,21 +34,12 @@ func (d DnsZonesModule) DefaultAttrs() []string {
 func (d DnsZonesModule) Run(session *ldapsession.LDAPSession, attrs []string) error {
 	locations := []string{"CN=MicrosoftDNS,DC=DomainDnsZones,%s", "CN=MicrosoftDNS,DC=ForestDnsZones,%s", "CN=MicrosoftDNS,CN=System,%s"}
 	baseDN := session.BaseDN
-	results := make([]*ldap.SearchResult, 0)
+	var requests []*ldap.SearchRequest
 	for _, location := range locations {
-		session.BaseDN = fmt.Sprintf(location, baseDN)
+		dn := fmt.Sprintf(location, baseDN)
 
-		searchReq := session.MakeSimpleSearchRequest("(&(objectClass=dnsZone)(!name=RootDNSServers)(!name=*.in-addr.arpa)(!name=_msdcs.*)(!name=..TrustAnchors))", attrs)
-		res, err := session.GetSearchResults(searchReq)
-
-		if err != nil {
-			return err
-		}
-
-		results = append(results, res)
+		searchReq := session.MakeSearchRequestWithDN(dn, "(&(objectClass=dnsZone)(!name=RootDNSServers)(!name=*.in-addr.arpa)(!name=_msdcs.*)(!name=..TrustAnchors))", attrs)
+		requests = append(requests, searchReq)
 	}
-	session.BaseDN = baseDN
-
-	session.ManualWriteMultipleSearchResultsToChan(results)
-	return nil
+	return session.ExecuteBulkSearchRequest(requests)
 }
