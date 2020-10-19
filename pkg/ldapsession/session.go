@@ -43,6 +43,7 @@ type ResultChannels struct {
 	Entries   chan *ldap.Entry
 	Referrals chan string
 	Controls  chan ldap.Control
+	keepOpen bool
 }
 
 type DomainInfo struct {
@@ -152,8 +153,16 @@ func (w *LDAPSession) NewChannels(ctx context.Context) {
 		Entries:   make(chan *ldap.Entry),
 		Referrals: make(chan string),
 		Controls:  make(chan ldap.Control),
+		keepOpen: false,
 	}
 	w.ctx = ctx
+}
+
+// If you call this, the results channels will not automatically close when a search is finished and
+// will need to be manually closed with CloseChannels(). Be careful here - this can
+// cause all sorts of concurrency race conditions
+func (w *LDAPSession) keepChannelsOpen() {
+	w.Channels.keepOpen = true
 }
 
 func (w *LDAPSession) CloseChannels() {

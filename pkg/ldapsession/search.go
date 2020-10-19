@@ -19,21 +19,34 @@ func (w *LDAPSession) MakeSimpleSearchRequest(filter string, attrs []string) *ld
 		nil)
 }
 
+func (w *LDAPSession) MakeSearchRequestWithDN(baseDN, filter string, attrs []string) *ldap.SearchRequest {
+	return ldap.NewSearchRequest(
+		baseDN,
+		ldap.ScopeWholeSubtree,
+		ldap.NeverDerefAliases,
+		0, 0, false,
+		filter,
+		attrs,
+		nil)
+}
+
 // GetPagedSearchResults is a synchronous operation that will populate and return an ldap.SearchResult object
 func (w *LDAPSession) GetPagedSearchResults(request *ldap.SearchRequest) (result *ldap.SearchResult, err error) {
-	w.Log.WithFields(logrus.Fields{"filter": request.Filter, "attributes": request.Attributes}).Infof("sending LDAP search request")
+	w.Log.WithFields(logrus.Fields{"baseDN": request.BaseDN, "filter": request.Filter, "attributes": request.Attributes}).Infof("sending LDAP search request")
 	return w.LConn.SearchWithPaging(request, 1000)
 }
 
 func (w *LDAPSession) GetSearchResults(request *ldap.SearchRequest) (result *ldap.SearchResult, err error) {
-	w.Log.WithFields(logrus.Fields{"filter": request.Filter, "attributes": request.Attributes}).Infof("sending LDAP search request")
+	w.Log.WithFields(logrus.Fields{"baseDN": request.BaseDN, "filter": request.Filter, "attributes": request.Attributes}).Infof("sending LDAP search request")
 	return w.LConn.Search(request)
 }
 
 func (w *LDAPSession) ManualWriteSearchResultsToChan(results *ldap.SearchResult) {
 	w.Log.Debugf("received search results, writing %d entries to channel", len(results.Entries))
 
-	defer w.CloseChannels()
+	if (!w.Channels.keepOpen) {
+		defer w.CloseChannels()
+	}
 
 	for _, entry := range results.Entries {
 		w.Channels.Entries <- entry
@@ -67,15 +80,17 @@ func (w *LDAPSession) ManualWriteMultipleSearchResultsToChan(multipleResults []*
 // ExecuteSearchRequest performs a paged search and writes results to the LDAPsession's defined results channel.
 // it only returns an err
 func (w *LDAPSession) ExecuteSearchRequest(searchRequest *ldap.SearchRequest) error {
-	w.Log.WithFields(logrus.Fields{"filter": searchRequest.Filter, "attributes": searchRequest.Attributes}).Infof("sending LDAP search request")
+	w.Log.WithFields(logrus.Fields{"baseDN": searchRequest.BaseDN, "filter": searchRequest.Filter, "attributes": searchRequest.Attributes}).Infof("sending LDAP search request")
 
 	if w.Channels == nil {
 		return fmt.Errorf("no channels defined. Call SetChannels first, or use GetPagedSearchResults instead")
 	}
 
 	defer func() {
-		w.Log.Debugf("search finished. closing channels...")
-		w.CloseChannels()
+		if (!w.Channels.keepOpen) {
+			w.Log.Debugf("search finished. closing channels...")
+			w.CloseChannels()
+		}
 	}()
 
 	// basically a re-implementation of the standard function: https://github.com/go-ldap/ldap/blob/master/v3/search.go#L253
@@ -153,5 +168,19 @@ PagedSearch:
 		pagingControl.PagingSize = 0
 		w.LConn.Search(searchRequest)
 	}
+	return nil
+}
+
+// ExecuteBulkSearchRequest will take a slice of ldap.SearchRequest and execute each one sequentially,
+// keeping the results channels open until the end of the last one
+func (w *LDAPSession) ExecuteBulkSearchRequest(searchRequests []*ldap.SearchRequest) error {
+	w.keepChannelsOpen()
+	for _, request := range searchRequests {
+		err := w.ExecuteSearchRequest(request)
+		if err != nil {
+			return err
+		}
+	}
+	w.CloseChannels()
 	return nil
 }
