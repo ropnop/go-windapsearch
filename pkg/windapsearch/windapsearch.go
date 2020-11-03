@@ -35,25 +35,26 @@ type CommandLineOptions struct {
 	Help             bool
 	Domain           string
 	DomainController string
-	Username         string
-	Password         string
-	NTLMHash         string
-	UseNTLM          bool
-	Port             int
-	Proxy            string
-	Secure           bool
-	ResolveHosts     bool
-	Attributes       []string
-	FullAttributes   bool
-	Output           string
-	JSON             bool
-	Module           string
-	Interactive      bool
-	Version          bool
-	Verbose          bool
-	Debug            bool
-	PageSize         int
-	ModuleFlags      *pflag.FlagSet
+	Username             string
+	Password             string
+	NTLMHash             string
+	UseNTLM              bool
+	Port                 int
+	Proxy                string
+	Secure               bool
+	ResolveHosts         bool
+	Attributes           []string
+	FullAttributes       bool
+	IgnoreDisplayFilters bool
+	Output               string
+	JSON                 bool
+	Module               string
+	Interactive          bool
+	Version              bool
+	Verbose              bool
+	Debug                bool
+	PageSize             int
+	ModuleFlags          *pflag.FlagSet
 }
 
 func NewSession() *WindapSearchSession {
@@ -71,6 +72,7 @@ func NewSession() *WindapSearchSession {
 	wFlags.BoolVar(&w.Options.Secure, "secure", false, "Use LDAPS. This will not verify TLS certs, however. (default: false)")
 	wFlags.StringVar(&w.Options.Proxy, "proxy", "", "SOCKS5 Proxy to use (e.g. 127.0.0.1:9050)")
 	wFlags.BoolVar(&w.Options.FullAttributes, "full", false, "Output all attributes from LDAP")
+	wFlags.BoolVar(&w.Options.IgnoreDisplayFilters, "ignore-display-filters", false, "Ignore any display filters set by the module and always output every entry")
 	wFlags.StringVarP(&w.Options.Output, "output", "o", "", "Save results to file")
 	wFlags.BoolVarP(&w.Options.JSON, "json", "j", false, "Convert LDAP output to JSON")
 	wFlags.IntVar(&w.Options.PageSize, "page-size", 1000, "LDAP page size to use")
