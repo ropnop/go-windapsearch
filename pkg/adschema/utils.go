@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf16"
 )
 
 var FunctionalityLevelsMapping = map[string]string{
@@ -66,4 +67,15 @@ func NTFileTimeToTimestamp(s string) (timestamp time.Time, err error) {
 func ADLdapTimeToTimestamp(s string) (timestamp time.Time, err error) {
 	s = strings.TrimSuffix(s, ".0Z")
 	return time.Parse("20060102150405", s)
+}
+
+// credit: https://golang.org/src/syscall/syscall_windows.go
+func UTF16ToString(s []uint16) string {
+	for i, v := range s {
+		if v == 0 {
+			s = s[0:i]
+			break
+		}
+	}
+	return string(utf16.Decode(s))
 }

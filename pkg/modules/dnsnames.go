@@ -29,7 +29,7 @@ func (d DnsNamesModule) FlagSet() *pflag.FlagSet {
 }
 
 func (d DnsNamesModule) DefaultAttrs() []string {
-	return []string{"name", "dnsTombstoned"}
+	return []string{"name", "dnsRecord", "dnsTombstoned"}
 }
 
 // Optional function for the module interface that will be called by searchResultWorker

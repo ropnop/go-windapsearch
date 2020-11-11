@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/go-objectsid"
 	"github.com/ropnop/go-windapsearch/pkg/adschema/enums"
+	"github.com/ropnop/go-windapsearch/pkg/adschema/objectreplicalinks"
 	"strconv"
 	"time"
 )
@@ -88,6 +89,9 @@ func ConvertSid(name string, b []byte) (interface{}, error) {
 }
 
 func ConvertObjectReplicaLink(name string, b []byte) (interface{}, error) {
+	if _, ok := objectreplicalinks.ObjectReplicaLinkFuncs[name]; ok {
+		return objectreplicalinks.ObjectReplicaLinkFuncs[name](b), nil
+	}
 	if len(b) != 16 {
 		return printable(b), nil
 	}
