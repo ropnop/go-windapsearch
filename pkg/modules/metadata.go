@@ -1,8 +1,8 @@
 package modules
 
 import (
-	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/go-ldap/ldap/v3"
+	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/spf13/pflag"
 )
 

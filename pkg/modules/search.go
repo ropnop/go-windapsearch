@@ -2,9 +2,9 @@ package modules
 
 import (
 	"fmt"
+	"github.com/go-ldap/ldap/v3"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/ropnop/go-windapsearch/pkg/utils"
-	"github.com/go-ldap/ldap/v3"
 	"github.com/spf13/pflag"
 )
 
