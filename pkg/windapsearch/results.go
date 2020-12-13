@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/ropnop/go-windapsearch/pkg/adschema"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
+	"github.com/ropnop/go-windapsearch/pkg/modules"
 	"io"
 	"sync"
 )
@@ -49,6 +50,10 @@ func (w *WindapSearchSession) searchResultWorker(chans *ldapsession.ResultChanne
 			}
 			w.Log.WithField("DN", entry.DN).Debug("parsing entry")
 			e := &adschema.ADEntry{entry}
+			if !w.Options.IgnoreDisplayFilters && !modules.DisplayFilter(w.Module, e) {
+				w.Log.WithField("DN", e.DN).Debug("skipping entry due to module display filter")
+				continue
+			}
 			if !w.Options.JSON {
 				out <- []byte(e.LDAPFormat())
 			} else {

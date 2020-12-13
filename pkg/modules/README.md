@@ -8,6 +8,8 @@ The following modules have been implemented, with functionality copied from the 
  * [admin-objects](#admin-objects)
  * [computers](#computers)
  * [custom](#custom)
+ * [dns-names](#dns-names)
+ * [dns-zones](#dns-zones)  
  * [domain-admins](#domain-admins)
  * [gpos](#gpos)
  * [groups](#groups)
@@ -83,11 +85,66 @@ The module lets you specify a custom LDAP syntax filter to run, and returns all 
 
 **Example Usage**: 
 ```
-$ ./bin/windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p GoPadres98 -m custom --filter "(sAMAccountName=thoffman)" --attrs pwdLastSet -j | jq .
+$ ./bin/windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m custom --filter "(sAMAccountName=thoffman)" --attrs pwdLastSet -j | jq .
 [
   {
     "dn": "CN=Trevor Hoffman,OU=users,OU=LAB,DC=lab,DC=ropnop,DC=com",
     "pwdLastSet": "2019-05-16T18:39:48.1597266-05:00"
+  }
+]
+```
+
+## dns-names
+**Description**: `Query AD integrated DNS for domain names`
+
+**Default Attrs**: `name, dnsTombstoned`
+
+**Base Filter**: `(objectClass=*)`
+
+**Additional Options**: ``
+
+The module queries the Active Directory integrated DNS and returns all objects. Unfortunately, there is no attribute for the complete FQDN, therefore the dn is returned, containing sufficient information to recover the actual FQDN.
+
+**Example Usage**: 
+```
+$ ./bin/windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m dns-names -j | jq .
+[
+  {
+    "dn": "DC=sharepoint,DC=lab.ropnop.com,CN=MicrosoftDNS,DC=DomainDnsZones,DC=lab,DC=ropnop,DC=com"
+  },
+  {
+    "dn": "DC=dc,DC=lab.ropnop.com,CN=MicrosoftDNS,DC=DomainDnsZones,DC=lab,DC=ropnop,DC=com"
+  },
+  {
+    "dn": "DC=app01,DC=lab.ropnop.com,CN=MicrosoftDNS,DC=DomainDnsZones,DC=lab,DC=ropnop,DC=com"
+  },
+  ...
+]
+
+```
+
+## dns-zones
+**Description**: `Query AD integrated DNS for registered zones`
+
+**Default Attrs**: `dn, name`
+
+**Base Filter**: `(&(objectClass=dnsZone)(!name=RootDNSServers)(!name=*.in-addr.arpa)(!name=_msdcs.*)(!name=..TrustAnchors))`
+
+**Additional Options**: ``
+
+The module queries the Active Directory integrated DNS and returns all DNS zones. Unfortunately, there is no attribute for the complete FQDN, therefore the dn is returned, containing sufficient information to recover the actual FQDN.
+
+**Example Usage**: 
+```
+$ ./bin/windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m dns-zones -j | jq .
+[
+  {
+    "dn": "DC=lab.ropnop.com,CN=MicrosoftDNS,DC=DomainDnsZones,DC=lab,DC=ropnop,DC=com",
+    "name": "lab.ropnop.com"
+  },
+  {
+    "dn": "DC=dev.ropnop.net,CN=MicrosoftDNS,DC=DomainDnsZones,DC=dev,DC=ropnop,DC=net",
+    "name": "dev.ropnop.net"
   }
 ]
 ```
