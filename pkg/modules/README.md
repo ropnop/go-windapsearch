@@ -8,6 +8,8 @@ The following modules have been implemented, with functionality copied from the 
  * [admin-objects](#admin-objects)
  * [computers](#computers)
  * [custom](#custom)
+ * [dns-names](#dns-names)
+ * [dns-zones](#dns-zones)  
  * [domain-admins](#domain-admins)
  * [gpos](#gpos)
  * [groups](#groups)
