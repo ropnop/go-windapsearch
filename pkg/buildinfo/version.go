@@ -7,7 +7,7 @@ import (
 
 var (
 	Version     = "dev"
-	GitSHA      = "N/A"
+	GitSHA      = "HEAD"
 	BuildDate   = "N/A"
 	BuildNumber = ""
 	GoVersion   string
