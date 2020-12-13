@@ -13,11 +13,6 @@ This is a complete re-write of my earlier [Python implementation](https://github
 It is recommended to download pre-compiled binaries for amd64 Linux/Mac/Windows from the [latest releases](https://github.com/ropnop/go-windapsearch/releases)
 
 ### Install from Source
-If you want to install from the latest (may be unstable), you can install via `go get`:
-```
-go get github.com/ropnop/go-windapsearch/cmd/windapsearch
-```
-
 To build from source, I use [mage](https://github.com/magefile/mage), a Make like tool written in Go. Install `mage` then run the mage targets:
 
 ```
