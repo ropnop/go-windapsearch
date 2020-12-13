@@ -175,12 +175,12 @@ PagedSearch:
 // keeping the results channels open until the end of the last one
 func (w *LDAPSession) ExecuteBulkSearchRequest(searchRequests []*ldap.SearchRequest) error {
 	w.keepChannelsOpen()
+	defer w.CloseChannels()
 	for _, request := range searchRequests {
 		err := w.ExecuteSearchRequest(request)
 		if err != nil {
 			return err
 		}
 	}
-	w.CloseChannels()
 	return nil
 }
