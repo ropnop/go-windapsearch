@@ -31,10 +31,10 @@ type WindapSearchSession struct {
 }
 
 type CommandLineOptions struct {
-	FlagSet          *pflag.FlagSet
-	Help             bool
-	Domain           string
-	DomainController string
+	FlagSet              *pflag.FlagSet
+	Help                 bool
+	Domain               string
+	DomainController     string
 	Username             string
 	Password             string
 	NTLMHash             string

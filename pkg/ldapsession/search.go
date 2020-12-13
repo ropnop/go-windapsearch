@@ -44,7 +44,7 @@ func (w *LDAPSession) GetSearchResults(request *ldap.SearchRequest) (result *lda
 func (w *LDAPSession) ManualWriteSearchResultsToChan(results *ldap.SearchResult) {
 	w.Log.Debugf("received search results, writing %d entries to channel", len(results.Entries))
 
-	if (!w.Channels.keepOpen) {
+	if !w.Channels.keepOpen {
 		defer w.CloseChannels()
 	}
 
@@ -87,7 +87,7 @@ func (w *LDAPSession) ExecuteSearchRequest(searchRequest *ldap.SearchRequest) er
 	}
 
 	defer func() {
-		if (!w.Channels.keepOpen) {
+		if !w.Channels.keepOpen {
 			w.Log.Debugf("search finished. closing channels...")
 			w.CloseChannels()
 		}

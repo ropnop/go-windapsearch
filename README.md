@@ -38,35 +38,38 @@ $ ./windapsearch --version
 ```
 $ ./windapsearch -h
 windapsearch: a tool to perform Windows domain enumeration through LDAP queries
-Version: dev (f78ee36) | Built: 06/23/20 (go1.14.3) | Ronnie Flathers @ropnop
+Version: dev (c9f2ee0) | Built: 12/13/20 (go1.15.5) | Ronnie Flathers @ropnop
 
 Usage: ./windapsearch [options] -m [module] [module options]
 
 Options:
-  -d, --domain string     The FQDN of the domain (e.g. 'lab.example.com'). Only needed if dc not provided
-      --dc string         The Domain Controller to query against
-  -u, --username string   The full username with domain to bind with (e.g. 'ropnop@lab.example.com' or 'LAB\ropnop')
-                           If not specified, will attempt anonymous bind
-  -p, --password string   Password to use. If not specified, will be prompted for
-      --hash string       NTLM Hash to use instead of password (i.e. pass-the-hash)
-      --ntlm              Use NTLM auth (automatic if hash is set)
-      --port int          Port to connect to (if non standard)
-      --secure            Use LDAPS. This will not verify TLS certs, however. (default: false)
-      --proxy string      SOCKS5 Proxy to use (e.g. 127.0.0.1:9050)
-      --full              Output all attributes from LDAP
-  -o, --output string     Save results to file
-  -j, --json              Convert LDAP output to JSON
-      --page-size int     LDAP page size to use (default 1000)
-      --version           Show version info and exit
-  -v, --verbose           Show info logs
-      --debug             Show debug logs
-  -h, --help              Show this help
-  -m, --module string     Module to use
+  -d, --domain string            The FQDN of the domain (e.g. 'lab.example.com'). Only needed if dc not provided
+      --dc string                The Domain Controller to query against
+  -u, --username string          The full username with domain to bind with (e.g. 'ropnop@lab.example.com' or 'LAB\ropnop')
+                                  If not specified, will attempt anonymous bind
+  -p, --password string          Password to use. If not specified, will be prompted for
+      --hash string              NTLM Hash to use instead of password (i.e. pass-the-hash)
+      --ntlm                     Use NTLM auth (automatic if hash is set)
+      --port int                 Port to connect to (if non standard)
+      --secure                   Use LDAPS. This will not verify TLS certs, however. (default: false)
+      --proxy string             SOCKS5 Proxy to use (e.g. 127.0.0.1:9050)
+      --full                     Output all attributes from LDAP
+      --ignore-display-filters   Ignore any display filters set by the module and always output every entry
+  -o, --output string            Save results to file
+  -j, --json                     Convert LDAP output to JSON
+      --page-size int            LDAP page size to use (default 1000)
+      --version                  Show version info and exit
+  -v, --verbose                  Show info logs
+      --debug                    Show debug logs
+  -h, --help                     Show this help
+  -m, --module string            Module to use
 
 Available modules:
     admin-objects       Enumerate all objects with protected ACLs (i.e admins)
     computers           Enumerate AD Computers
     custom              Run a custom LDAP syntax filter
+    dns-names           List all DNS Names
+    dns-zones           List all DNS Zones
     domain-admins       Recursively list all users objects in Domain Admins group
     gpos                Enumerate Group Policy Objects
     groups              List all AD groups
@@ -127,5 +130,7 @@ If you are experiencing issues, please use the `--debug` option for much more de
 
 # Credits
  - The authors of [go-ldap](https://github.com/go-ldap/ldap) for the LDAP client that powers all of this
+ - [Michael Eder](https://twitter.com/michael_eder_) for his PR and contributions to the `dns-names` and `dns-zones` modules!  
  - [audibleblink](https://twitter.com/4lex) for the [idea](https://twitter.com/4lex/status/1254037754842931200?s=20) and the [package](github.com/audibleblink/msldapuac) to parse UserAccountControl from LDAP
+ - [dirkjanm](https://twitter.com/_dirkjan) for [adidnsdump](https://github.com/dirkjanm/adidnsdump)
 

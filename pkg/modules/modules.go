@@ -14,7 +14,6 @@ type Module interface {
 	Run(session *ldapsession.LDAPSession, attrs []string) error
 }
 
-
 type ModuleWithDisplayFilter interface {
 	//DisplayFilter is an optional function for a module used to filter what results get written to the output
 	//it's best to try and filter the request, but when that's not possible, a custom function can be provided

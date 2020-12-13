@@ -97,13 +97,14 @@ $ ./bin/windapsearch -d lab.ropnop.com -u agreen@lab.ropnop.com -p $PASS -m cust
 ## dns-names
 **Description**: `Query AD integrated DNS for domain names`
 
-**Default Attrs**: `name, dnsTombstoned`
+**Default Attrs**: `name, dnsTombstoned, dnsRecord`
 
 **Base Filter**: `(objectClass=*)`
 
 **Additional Options**: ``
 
-The module queries the Active Directory integrated DNS and returns all objects. Unfortunately, there is no attribute for the complete FQDN, therefore the dn is returned, containing sufficient information to recover the actual FQDN.
+The module queries the Active Directory integrated DNS and returns all objects.
+When using JSON output, `windapsearch` will attempt to unmarshal the binary `dnsRecord` field and display the DNS contents *Note: this implementation is not complete for all record types. Fallback will always just be the base64 encode blob*
 
 **Example Usage**: 
 ```

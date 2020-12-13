@@ -3,13 +3,11 @@ module github.com/ropnop/go-windapsearch
 go 1.13
 
 require (
-	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c
 	github.com/audibleblink/msldapuac v0.2.0
 	github.com/bwmarrin/go-objectsid v0.0.0-20191126144531-5fee401a2f37
 	github.com/go-ldap/ldap/v3 v3.2.1
-	github.com/hashicorp/go-version v1.2.0 // indirect
+	github.com/lunixbochs/struc v0.0.0-20200707160740-784aaebc1d40
 	github.com/magefile/mage v1.9.0
-	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/pflag v1.0.5
 	github.com/tcnksm/go-input v0.0.0-20180404061846-548a7d7a8ee8

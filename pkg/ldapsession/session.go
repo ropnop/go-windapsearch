@@ -43,7 +43,7 @@ type ResultChannels struct {
 	Entries   chan *ldap.Entry
 	Referrals chan string
 	Controls  chan ldap.Control
-	keepOpen bool
+	keepOpen  bool
 }
 
 type DomainInfo struct {
@@ -153,7 +153,7 @@ func (w *LDAPSession) NewChannels(ctx context.Context) {
 		Entries:   make(chan *ldap.Entry),
 		Referrals: make(chan string),
 		Controls:  make(chan ldap.Control),
-		keepOpen: false,
+		keepOpen:  false,
 	}
 	w.ctx = ctx
 }
