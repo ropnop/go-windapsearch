@@ -36,6 +36,7 @@ type CommandLineOptions struct {
 	Domain               string
 	DomainController     string
 	Username             string
+	BindDN               string
 	Password             string
 	NTLMHash             string
 	UseNTLM              bool
@@ -65,6 +66,7 @@ func NewSession() *WindapSearchSession {
 	wFlags.StringVarP(&w.Options.Domain, "domain", "d", "", "The FQDN of the domain (e.g. 'lab.example.com'). Only needed if dc not provided")
 	wFlags.StringVar(&w.Options.DomainController, "dc", "", "The Domain Controller to query against")
 	wFlags.StringVarP(&w.Options.Username, "username", "u", "", "The full username with domain to bind with (e.g. 'ropnop@lab.example.com' or 'LAB\\ropnop')\n If not specified, will attempt anonymous bind")
+	wFlags.StringVar(&w.Options.BindDN, "bindDN", "", "Full DN to use to bind (as opposed to -u for just username)\n e.g. cn=rflathers,ou=users,dc=example,dc=com")
 	wFlags.StringVarP(&w.Options.Password, "password", "p", "", "Password to use. If not specified, will be prompted for")
 	wFlags.StringVar(&w.Options.NTLMHash, "hash", "", "NTLM Hash to use instead of password (i.e. pass-the-hash)")
 	wFlags.BoolVar(&w.Options.UseNTLM, "ntlm", false, "Use NTLM auth (automatic if hash is set)")
@@ -223,17 +225,20 @@ func (w *WindapSearchSession) Run() (err error) {
 		return
 	}
 	password := w.Options.Password
-	username := w.Options.Username
+	var username string
+	if w.Options.BindDN != "" {
+		username = w.Options.BindDN
+	} else {
+		username = w.Options.Username
+	}
 
 	if w.Options.UseNTLM && username == "" {
 		return fmt.Errorf("must provide username for NTLM authentication")
 	}
 
 	if username != "" { // only prompt for password if username is provided
-		if len(strings.Split(w.Options.Username, "@")) == 1 {
+		if len(strings.Split(w.Options.Username, "@")) == 1 && w.Options.BindDN == "" {
 			username = fmt.Sprintf("%s@%s", w.Options.Username, w.Options.Domain)
-		} else {
-			username = w.Options.Username
 		}
 		if username != "" && password == "" && w.Options.NTLMHash == "" {
 			password, err = utils.SecurePrompt(fmt.Sprintf("Password for [%s]", username))

@@ -33,7 +33,7 @@ $ ./windapsearch --version
 ```
 $ ./windapsearch -h
 windapsearch: a tool to perform Windows domain enumeration through LDAP queries
-Version: dev (c9f2ee0) | Built: 12/13/20 (go1.15.5) | Ronnie Flathers @ropnop
+Version: dev (9f91330) | Built: 03/04/21 (go1.16) | Ronnie Flathers @ropnop
 
 Usage: ./windapsearch [options] -m [module] [module options]
 
@@ -42,6 +42,8 @@ Options:
       --dc string                The Domain Controller to query against
   -u, --username string          The full username with domain to bind with (e.g. 'ropnop@lab.example.com' or 'LAB\ropnop')
                                   If not specified, will attempt anonymous bind
+      --bindDN string            Full DN to use to bind (as opposed to -u for just username)
+                                  e.g. cn=rflathers,ou=users,dc=example,dc=com
   -p, --password string          Password to use. If not specified, will be prompted for
       --hash string              NTLM Hash to use instead of password (i.e. pass-the-hash)
       --ntlm                     Use NTLM auth (automatic if hash is set)
