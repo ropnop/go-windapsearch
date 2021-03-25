@@ -2,12 +2,14 @@ package modules
 
 import (
 	"fmt"
+	"github.com/go-ldap/ldap/v3"
 	"github.com/ropnop/go-windapsearch/pkg/ldapsession"
 	"github.com/spf13/pflag"
 )
 
 type CustomSearch struct {
 	CustomFilter string
+	CustomBaseDN string
 }
 
 func init() {
@@ -29,6 +31,7 @@ func (c *CustomSearch) Filter() string {
 func (c *CustomSearch) FlagSet() *pflag.FlagSet {
 	flags := pflag.NewFlagSet("custom", pflag.ExitOnError)
 	flags.StringVar(&c.CustomFilter, "filter", "", "LDAP syntax filter")
+	flags.StringVar(&c.CustomBaseDN, "base", "", "Custom base DN to search from")
 	return flags
 }
 
@@ -40,6 +43,11 @@ func (c *CustomSearch) Run(lSession *ldapsession.LDAPSession, attrs []string) er
 	if c.Filter() == "" {
 		return fmt.Errorf("must provide a filter to run")
 	}
-	searchReq := lSession.MakeSimpleSearchRequest(c.Filter(), attrs)
+	var searchReq *ldap.SearchRequest
+	if c.CustomBaseDN != "" {
+		searchReq = lSession.MakeSearchRequestWithDN(c.CustomBaseDN, c.Filter(), attrs)
+	} else {
+		searchReq = lSession.MakeSimpleSearchRequest(c.Filter(), attrs)
+	}
 	return lSession.ExecuteSearchRequest(searchReq)
 }
